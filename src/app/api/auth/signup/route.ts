@@ -29,20 +29,25 @@ export async function POST(request: Request) {
       );
     }
 
-    // Get the default society
-    const society = await prisma.society.findFirst({
+    // Get or create a default society
+    let society = await prisma.society.findFirst({
       where: { deletedAt: null },
     });
 
     if (!society) {
-      return NextResponse.json(
-        { error: "No society found. Please contact administration." },
-        { status: 404 }
-      );
+      society = await prisma.society.create({
+        data: {
+          name: "Default Society",
+          address: "",
+          city: "",
+          state: "",
+          pincode: "",
+        },
+      });
     }
 
-    // Find the flat
-    const flat = await prisma.flat.findFirst({
+    // Find or create the flat
+    let flat = await prisma.flat.findFirst({
       where: {
         societyId: society.id,
         flatNumber: flatNumber.trim(),
@@ -51,10 +56,13 @@ export async function POST(request: Request) {
     });
 
     if (!flat) {
-      return NextResponse.json(
-        { error: "Flat not found. Please check your flat number or contact the society committee." },
-        { status: 404 }
-      );
+      flat = await prisma.flat.create({
+        data: {
+          flatNumber: flatNumber.trim(),
+          floor: 0,
+          societyId: society.id,
+        },
+      });
     }
 
     // Hash the password
