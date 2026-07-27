@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,7 @@ import { Building2, Loader2, Mail, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 export default function LoginPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const [email, setEmail] = useState("");
@@ -39,11 +40,11 @@ export default function LoginPage() {
       if (result?.error) {
         toast.error("Invalid email or password. Please try again.");
       } else {
-        // Show success message briefly, then force full page reload to ensure
-        // the session cookie is properly set before middleware checks authentication
+        // Show success message briefly, then redirect using Next.js router
+        // to ensure the session cookie is properly set before middleware checks
         toast.success("Login successful! Redirecting...");
         setTimeout(() => {
-          window.location.href = callbackUrl;
+          router.push(callbackUrl);
         }, 500);
       }
     } catch (error) {
