@@ -28,15 +28,13 @@ export const {
             return null;
           }
 
-          const user = await prisma.user.findFirst({
+          const user = await prisma.user.findUnique({
             where: {
               email: credentials.email as string,
-              isActive: true,
-              deletedAt: null,
             },
           });
 
-          if (!user) {
+          if (!user || !user.isActive || user.deletedAt) {
             return null;
           }
 
@@ -63,7 +61,7 @@ export const {
           };
         } catch (error) {
           console.error("[Auth] Authorization error:", error);
-          return null;
+          throw new Error("Authentication failed due to a server error. Please try again.");
         }
       },
     }),
