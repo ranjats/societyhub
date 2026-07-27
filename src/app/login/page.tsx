@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +19,8 @@ import { Building2, Loader2, Mail, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -38,9 +39,12 @@ export default function LoginPage() {
       if (result?.error) {
         toast.error("Invalid email or password. Please try again.");
       } else {
+        // Show success message briefly, then force full page reload to ensure
+        // the session cookie is properly set before middleware checks authentication
         toast.success("Login successful! Redirecting...");
-        router.push("/dashboard");
-        router.refresh();
+        setTimeout(() => {
+          window.location.href = callbackUrl;
+        }, 500);
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.");
