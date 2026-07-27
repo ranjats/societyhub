@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
@@ -13,15 +12,11 @@ export default function AppLayout({
   children: React.ReactNode;
 }) {
   const { data: session, status } = useSession();
-  const router = useRouter();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, router]);
+  // Auth is handled by middleware. If middleware passes, user is authenticated.
+  // No client-side redirect needed — it causes redirect loops on Vercel.
 
   if (status === "loading") {
     return (
