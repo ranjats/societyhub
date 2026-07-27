@@ -26,8 +26,11 @@ export const {
       async authorize(credentials) {
         try {
           if (!credentials?.email || !credentials?.password) {
+            console.error("[Auth] Missing email or password");
             return null;
           }
+
+          console.log("[Auth] Attempting login for:", credentials.email);
 
           const user = await prisma.user.findUnique({
             where: {
@@ -36,6 +39,7 @@ export const {
           });
 
           if (!user || !user.isActive || user.deletedAt) {
+            console.error("[Auth] User not found, inactive, or deleted:", credentials.email);
             return null;
           }
 
@@ -45,6 +49,7 @@ export const {
           );
 
           if (!isPasswordValid) {
+            console.error("[Auth] Invalid password for:", credentials.email);
             return null;
           }
 
@@ -52,6 +57,8 @@ export const {
             where: { id: user.id },
             data: { lastLoginAt: new Date() },
           });
+
+          console.log("[Auth] Login successful for:", credentials.email);
 
           return {
             id: user.id,
