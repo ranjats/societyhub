@@ -40,12 +40,12 @@ export default function LoginPage() {
       if (result?.error) {
         toast.error("Invalid email or password. Please try again.");
       } else {
-        // Show success message briefly, then redirect using Next.js router
-        // to ensure the session cookie is properly set before middleware checks
+        // Show success message briefly, then refresh session state and redirect
+        // router.refresh() re-fetches the session from the server so middleware
+        // can see the updated JWT token before we navigate
         toast.success("Login successful! Redirecting...");
-        setTimeout(() => {
-          router.push(callbackUrl);
-        }, 500);
+        await router.refresh();
+        router.push(callbackUrl);
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.");
