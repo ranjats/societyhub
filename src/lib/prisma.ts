@@ -4,7 +4,6 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
-  pool: Pool | undefined;
 };
 
 function createPrismaClient() {
@@ -16,12 +15,14 @@ function createPrismaClient() {
     );
   }
 
-  // Reuse pool in development to prevent leaks
-  if (!globalForPrisma.pool) {
-    globalForPrisma.pool = new Pool({ connectionString });
-  }
+  const pool = new Pool({
+    connectionString,
+    max: 5,
+    idleTimeoutMillis: 10000,
+    connectionTimeoutMillis: 5000,
+  });
 
-  const adapter = new PrismaPg(globalForPrisma.pool);
+  const adapter = new PrismaPg(pool);
   return new PrismaClient({
     adapter,
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
