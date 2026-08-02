@@ -48,10 +48,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for authentication token
+  // Check for authentication token.
+  // Fall back to NEXTAUTH_SECRET for deployments that followed the
+  // deprecated naming in .env.example — a missing/inconsistent secret
+  // here silently bounces users back to /login.
+  //
+  // IMPORTANT (production bug fix): getToken() defaults secureCookie to
+  // false, which makes it look for the cookie named "authjs.session-token".
+  // On HTTPS deployments (Vercel) Auth.js prefixes the session cookie with
+  // "__Secure-", so without secureCookie: true the middleware can't find the
+  // cookie and redirects every logged-in user back to /login.
   const token = await getToken({
     req: request,
-    secret: process.env.AUTH_SECRET,
+    secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
+    secureCookie: process.env.NODE_ENV === "production" || !!process.env.VERCEL,
   });
 
   // Redirect to login if no token
