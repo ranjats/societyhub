@@ -1,7 +1,9 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useState } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +21,7 @@ import { Building2, Loader2, Mail, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 export default function LoginPage() {
-  const router = useRouter();
+
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
   const [email, setEmail] = useState("");
@@ -40,12 +42,11 @@ export default function LoginPage() {
       if (result?.error) {
         toast.error("Invalid email or password. Please try again.");
       } else {
-        // Show success message briefly, then refresh session state and redirect
-        // router.refresh() re-fetches the session from the server so middleware
-        // can see the updated JWT token before we navigate
-        toast.success("Login successful! Redirecting...");
-        await router.refresh();
-        router.push(callbackUrl);
+        // Use window.location.href for a full page reload to ensure
+        // the session cookie is sent with the middleware request.
+        // router.push() does client-side navigation which may not
+        // include the freshly-set cookie in the request headers.
+        window.location.href = callbackUrl;
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.");
