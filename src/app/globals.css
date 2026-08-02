@@ -5,6 +5,8 @@
   --color-foreground: hsl(226, 45%, 12%);
   --color-card: hsl(0, 0%, 100%);
   --color-card-foreground: hsl(226, 45%, 12%);
+  --color-popover: hsl(0, 0%, 100%);
+  --color-popover-foreground: hsl(226, 45%, 12%);
   --color-primary: hsl(243, 75%, 59%);
   --color-primary-foreground: hsl(210, 40%, 98%);
   --color-primary-2: hsl(262, 83%, 58%);

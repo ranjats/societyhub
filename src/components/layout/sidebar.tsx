@@ -6,7 +6,6 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
   Users,
-  Building2,
   IndianRupee,
   Receipt,
   CalendarDays,
@@ -46,7 +45,6 @@ const adminMenuGroups: MenuGroup[] = [
     label: "Management",
     items: [
       { label: "Residents", href: "/residents", icon: Users },
-      { label: "Flats", href: "/flats", icon: Building2 },
       { label: "Collections", href: "/collections", icon: IndianRupee },
       { label: "Expenses", href: "/expenses", icon: Receipt },
       { label: "Events", href: "/events", icon: CalendarDays },

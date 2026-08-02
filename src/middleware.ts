@@ -16,7 +16,7 @@ const unauthorizedPath = "/unauthorized";
 // Role-based route access rules
 const roleRouteAccess: Record<string, string[]> = {
   COMMITTEE_MEMBER: [
-    "/dashboard", "/residents", "/flats", "/collections", "/expenses",
+    "/dashboard", "/residents", "/collections", "/expenses",
     "/events", "/notices", "/assets", "/calendar", "/vehicles",
     "/reports", "/notifications", "/users", "/settings", "/profile", "/payments",
   ],

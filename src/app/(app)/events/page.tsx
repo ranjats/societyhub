@@ -292,7 +292,7 @@ export default function EventsPage() {
 
         </div>
         {isCommittee && event.participants.length > 0 && (
-          <Button size="sm" variant="outline" onClick={() => setViewingParticipants(event)}>
+          <Button size="sm" variant="outline" onClick={() => { setViewingParticipants(event); setIsParticipantsDialogOpen(true); }}>
             <ListChecks className="w-3.5 h-3.5 mr-1" /> View Participants ({event.participants.length})
           </Button>
         )}
