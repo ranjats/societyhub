@@ -21,6 +21,7 @@ import {
   Receipt, Plus, Search, TrendingDown, CheckCircle2, Clock, Edit, Trash2, AlertTriangle, RefreshCw, Loader2,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/page-header";
 import { toast } from "sonner";
 
 interface Expense {
@@ -125,8 +126,8 @@ export default function ExpensesPage() {
   if (error && !loading) {
     return (
       <div className="space-y-6">
-        <div><h1 className="text-2xl font-bold text-gray-900">Expenses</h1><p className="text-gray-500">Track and manage society expenses</p></div>
-        <Card className="border-red-200 bg-red-50/50"><CardContent className="flex flex-col items-center justify-center py-12"><AlertTriangle className="w-8 h-8 text-red-600 mb-4" /><h2 className="text-lg font-semibold text-red-900 mb-2">Failed to Load Expenses</h2><p className="text-red-700 text-sm text-center max-w-md mb-6">{error}</p><Button onClick={fetchExpenses} variant="outline" className="border-red-300 text-red-700 hover:bg-red-100"><RefreshCw className="w-4 h-4 mr-2" /> Try Again</Button></CardContent></Card>
+        <PageHeader title="Expenses" description="Track and manage society expenses" icon={Receipt} />
+        <Card className="border-red-100 bg-red-50/40"><CardContent className="flex flex-col items-center justify-center py-12"><AlertTriangle className="w-8 h-8 text-red-600 mb-4" /><h2 className="text-lg font-semibold text-red-900 mb-2">Failed to Load Expenses</h2><p className="text-red-700 text-sm text-center max-w-md mb-6">{error}</p><Button onClick={fetchExpenses} variant="outline" className="border-red-300 text-red-700 hover:bg-red-100"><RefreshCw className="w-4 h-4 mr-2" /> Try Again</Button></CardContent></Card>
       </div>
     );
   }
@@ -163,8 +164,7 @@ export default function ExpensesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div><h1 className="text-2xl font-bold text-gray-900">Expenses</h1><p className="text-gray-500">Track and manage society expenses</p></div>
+      <PageHeader title="Expenses" description="Track and manage society expenses" icon={Receipt}>
         <Dialog open={isAddDialogOpen} onOpenChange={(o) => { setIsAddDialogOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Add Expense</Button></DialogTrigger>
           <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -176,12 +176,12 @@ export default function ExpensesPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageHeader>
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-        <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="flex items-center justify-center w-10 h-10 rounded-lg bg-red-100"><TrendingDown className="w-5 h-5 text-red-600" /></div><div><p className="text-sm text-gray-500">Total Expenses</p><p className="text-lg font-bold text-red-600">{formatCurrency(totalExpenses)}</p></div></div></CardContent></Card>
-        <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100"><CheckCircle2 className="w-5 h-5 text-emerald-600" /></div><div><p className="text-sm text-gray-500">Paid</p><p className="text-lg font-bold text-emerald-600">{formatCurrency(expenses.filter((e) => e.status === "PAID").reduce((s, e) => s + Number(e.amount), 0))}</p></div></div></CardContent></Card>
-        <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-100"><Clock className="w-5 h-5 text-amber-600" /></div><div><p className="text-sm text-gray-500">Pending</p><p className="text-lg font-bold text-amber-600">{formatCurrency(expenses.filter((e) => e.status === "PENDING").reduce((s, e) => s + Number(e.amount), 0))}</p></div></div></CardContent></Card>
+        <Card className="card-hover"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-red-500/15 to-rose-500/15 border border-red-500/10"><TrendingDown className="w-5 h-5 text-red-600" /></div><div><p className="text-sm text-muted-foreground">Total Expenses</p><p className="text-lg font-bold text-red-600">{formatCurrency(totalExpenses)}</p></div></div></CardContent></Card>
+        <Card className="card-hover"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/15 to-teal-500/15 border border-emerald-500/10"><CheckCircle2 className="w-5 h-5 text-emerald-600" /></div><div><p className="text-sm text-muted-foreground">Paid</p><p className="text-lg font-bold text-emerald-600">{formatCurrency(expenses.filter((e) => e.status === "PAID").reduce((s, e) => s + Number(e.amount), 0))}</p></div></div></CardContent></Card>
+        <Card className="card-hover"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500/15 to-orange-500/15 border border-amber-500/10"><Clock className="w-5 h-5 text-amber-600" /></div><div><p className="text-sm text-muted-foreground">Pending</p><p className="text-lg font-bold text-amber-600">{formatCurrency(expenses.filter((e) => e.status === "PENDING").reduce((s, e) => s + Number(e.amount), 0))}</p></div></div></CardContent></Card>
       </div>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">

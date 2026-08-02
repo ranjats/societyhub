@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, Mail, Phone, Building2, Edit, Shield } from "lucide-react";
 import { getInitials } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/page-header";
 
 interface ProfileData {
   id: string;
@@ -52,10 +53,11 @@ export default function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
-        <p className="text-gray-500">View and manage your profile information</p>
-      </div>
+      <PageHeader
+        title="My Profile"
+        description="View and manage your profile information"
+        icon={User}
+      />
 
       <div className="grid gap-6 md:grid-cols-3">
         {/* Profile Card */}

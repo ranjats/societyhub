@@ -17,6 +17,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/page-header";
 
 interface ReportsData {
   totalCollection: number;
@@ -116,11 +117,8 @@ export default function ReportsPage() {
   if (error && !loading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
-          <p className="text-gray-500">Generate and download society reports</p>
-        </div>
-        <Card className="border-red-200 bg-red-50/50">
+        <PageHeader title="Reports" description="Generate and download society reports" icon={BarChart3} />
+        <Card className="border-red-100 bg-red-50/40">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
               <AlertTriangle className="w-8 h-8 text-red-600" />
@@ -139,16 +137,12 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
-          <p className="text-gray-500">Generate and download society reports</p>
-        </div>
+      <PageHeader title="Reports" description="Generate and download society reports" icon={BarChart3}>
         <Button variant="outline" onClick={fetchReports}>
           <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} />
           Refresh
         </Button>
-      </div>
+      </PageHeader>
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-4">

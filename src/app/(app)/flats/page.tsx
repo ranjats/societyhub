@@ -22,6 +22,7 @@ import {
   Building2, Plus, Search, Users, IndianRupee, BedDouble, Maximize, Edit, Trash2, AlertTriangle, RefreshCw, Loader2,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/page-header";
 import { toast } from "sonner";
 
 interface Flat {
@@ -181,7 +182,7 @@ export default function FlatsPage() {
   if (error && !loading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between"><div><h1 className="text-2xl font-bold text-gray-900">Flats</h1><p className="text-gray-500">Manage society flats</p></div></div>
+        <PageHeader title="Flats" description="Manage society flats" icon={Building2} />
         <Card className="border-red-200 bg-red-50/50"><CardContent className="flex flex-col items-center justify-center py-12"><AlertTriangle className="w-8 h-8 text-red-600 mb-4" /><h2 className="text-lg font-semibold text-red-900 mb-2">Failed to Load Flats</h2><p className="text-red-700 text-sm text-center max-w-md mb-6">{error}</p><Button onClick={fetchFlats} variant="outline" className="border-red-300 text-red-700 hover:bg-red-100"><RefreshCw className="w-4 h-4 mr-2" /> Try Again</Button></CardContent></Card>
       </div>
     );
@@ -233,8 +234,7 @@ export default function FlatsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-bold text-gray-900">Flats</h1><p className="text-gray-500">Manage society flats and apartments</p></div>
+      <PageHeader title="Flats" description="Manage society flats and apartments" icon={Building2}>
         <Dialog open={isAddDialogOpen} onOpenChange={(o) => { setIsAddDialogOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Add Flat</Button></DialogTrigger>
           <DialogContent>
@@ -246,7 +246,7 @@ export default function FlatsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageHeader>
 
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-md"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" /><Input placeholder="Search flats..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" /></div>

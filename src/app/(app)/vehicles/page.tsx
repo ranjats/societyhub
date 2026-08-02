@@ -21,6 +21,7 @@ import {
 import {
   Car, Plus, Search, User, Tag, Edit, Trash2, AlertTriangle, RefreshCw, Loader2,
 } from "lucide-react";
+import { PageHeader } from "@/components/ui/page-header";
 import { toast } from "sonner";
 
 interface Vehicle {
@@ -131,8 +132,8 @@ export default function VehiclesPage() {
   if (error && !loading) {
     return (
       <div className="space-y-6">
-        <div><h1 className="text-2xl font-bold text-gray-900">Vehicles</h1><p className="text-gray-500">Manage registered vehicles</p></div>
-        <Card className="border-red-200 bg-red-50/50"><CardContent className="flex flex-col items-center justify-center py-12"><AlertTriangle className="w-8 h-8 text-red-600 mb-4" /><h2 className="text-lg font-semibold text-red-900 mb-2">Failed to Load Vehicles</h2><p className="text-red-700 text-sm text-center max-w-md mb-6">{error}</p><Button onClick={fetchData} variant="outline" className="border-red-300 text-red-700 hover:bg-red-100"><RefreshCw className="w-4 h-4 mr-2" /> Try Again</Button></CardContent></Card>
+        <PageHeader title="Vehicles" description="Manage registered vehicles" icon={Car} />
+        <Card className="border-red-100 bg-red-50/40"><CardContent className="flex flex-col items-center justify-center py-12"><AlertTriangle className="w-8 h-8 text-red-600 mb-4" /><h2 className="text-lg font-semibold text-red-900 mb-2">Failed to Load Vehicles</h2><p className="text-red-700 text-sm text-center max-w-md mb-6">{error}</p><Button onClick={fetchData} variant="outline" className="border-red-300 text-red-700 hover:bg-red-100"><RefreshCw className="w-4 h-4 mr-2" /> Try Again</Button></CardContent></Card>
       </div>
     );
   }
@@ -191,8 +192,7 @@ export default function VehiclesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-bold text-gray-900">Vehicles</h1><p className="text-gray-500">Manage registered vehicles</p></div>
+      <PageHeader title="Vehicles" description="Manage registered vehicles" icon={Car}>
         <Dialog open={isAddDialogOpen} onOpenChange={(o) => { setIsAddDialogOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Register Vehicle</Button></DialogTrigger>
           <DialogContent>
@@ -204,7 +204,7 @@ export default function VehiclesPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageHeader>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100"><Car className="w-5 h-5 text-blue-600" /></div><div><p className="text-sm text-gray-500">Total</p><p className="text-lg font-bold">{vehicles.length}</p></div></div></CardContent></Card>

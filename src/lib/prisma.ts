@@ -4,27 +4,35 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
-  pool: Pool | undefined;
 };
 
 function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) {
+    console.error("[Prisma] DATABASE_URL environment variable is not set.");
     throw new Error(
       "DATABASE_URL environment variable is not set. " +
-      "Please check your .env file or environment configuration."
+      "Please check your Vercel environment variables."
     );
   }
 
-  // Reuse pool in development to prevent leaks
-  if (!globalForPrisma.pool) {
-    globalForPrisma.pool = new Pool({ connectionString });
-  }
+  console.log("[Prisma] Creating new client with connection string:", connectionString.replace(/:[^:@]+@/, ":***@"));
 
-  const adapter = new PrismaPg(globalForPrisma.pool);
+  const pool = new Pool({
+    connectionString,
+    max: 1,
+    idleTimeoutMillis: 0,
+    connectionTimeoutMillis: 10000,
+  });
+
+  pool.on("error", (err) => {
+    console.error("[Prisma] Unexpected pool error:", err);
+  });
+
+  const adapter = new PrismaPg(pool);
   return new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
+    log: ["error"],
   });
 }
 

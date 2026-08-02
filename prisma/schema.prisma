@@ -6,7 +6,349 @@ datasource db {
   provider = "postgresql"
 }
 
-// ─── Enums ───────────────────────────────────────────────────────────
+model Society {
+  id             String          @id @default(cuid())
+  name           String
+  address        String
+  city           String
+  state          String
+  pincode        String
+  contactEmail   String?
+  contactPhone   String?
+  totalFlats     Int             @default(0)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+  assets         Asset[]
+  assetBookings  AssetBooking[]
+  calendarEvents CalendarEvent[]
+  collections    Collection[]
+  events         Event[]
+  expenses       Expense[]
+  flats          Flat[]
+  notices        Notice[]
+  residents      Resident[]
+  users          User[]
+  vehicles       Vehicle[]
+
+  @@index([deletedAt])
+}
+
+model User {
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  firstName     String
+  lastName      String
+  phone         String?
+  role          UserRole       @default(RESIDENT)
+  avatar        String?
+  isActive      Boolean        @default(true)
+  lastLoginAt   DateTime?
+  resetToken    String? // sha256 hash of the password-reset token
+  resetTokenExpiry DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+  societyId     String
+  residentId    String?        @unique
+  collections   Collection[]
+  events        Event[]
+  expenses      Expense[]
+  notices       Notice[]
+  notifications Notification[]
+  resident      Resident?      @relation(fields: [residentId], references: [id])
+  society       Society        @relation(fields: [societyId], references: [id])
+
+  @@index([societyId])
+  @@index([role])
+  @@index([deletedAt])
+}
+
+model Resident {
+  id                String         @id @default(cuid())
+  firstName         String
+  lastName          String
+  email             String?        @unique
+  phone             String
+  gender            Gender?
+  dateOfBirth       DateTime?
+  aadharNumber      String?
+  ownershipType     OwnershipType  @default(OWNER)
+  familyMemberCount Int            @default(1)
+  emergencyContact  String?
+  emergencyPhone    String?
+  moveInDate        DateTime?
+  isActive          Boolean        @default(true)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  deletedAt         DateTime?
+  societyId         String
+  flatId            String
+  assetBookings     AssetBooking[]
+  eventParticipations EventParticipant[]
+  flat              Flat           @relation(fields: [flatId], references: [id])
+  society           Society        @relation(fields: [societyId], references: [id])
+  user              User?
+  vehicles          Vehicle[]
+
+  @@index([societyId])
+  @@index([flatId])
+  @@index([deletedAt])
+}
+
+model Flat {
+  id          String       @id @default(cuid())
+  flatNumber  String
+  block       String?
+  floor       Int
+  flatType    String?
+  area        Float?
+  bedrooms    Int?
+  status      FlatStatus   @default(OCCUPIED)
+  monthlyDues Decimal      @default(0) @db.Decimal(10, 2)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+  societyId   String
+  collections Collection[]
+  society     Society      @relation(fields: [societyId], references: [id])
+  residents   Resident[]
+
+  @@unique([societyId, flatNumber])
+  @@index([societyId])
+  @@index([status])
+  @@index([block])
+  @@index([deletedAt])
+}
+
+model Vehicle {
+  id                 String      @id @default(cuid())
+  registrationNumber String
+  type               VehicleType @default(CAR)
+  brand              String?
+  model              String?
+  color              String?
+  parkingSlot        String?
+  isActive           Boolean     @default(true)
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  deletedAt          DateTime?
+  societyId          String
+  residentId         String
+  resident           Resident    @relation(fields: [residentId], references: [id])
+  society            Society     @relation(fields: [societyId], references: [id])
+
+  @@unique([societyId, registrationNumber])
+  @@index([societyId])
+  @@index([residentId])
+  @@index([deletedAt])
+}
+
+model Collection {
+  id            String           @id @default(cuid())
+  amount        Decimal          @db.Decimal(10, 2)
+  dueDate       DateTime
+  paidDate      DateTime?
+  status        CollectionStatus @default(PENDING)
+  month         Int
+  year          Int
+  notes         String?
+  paymentMethod String?
+  submittedAt   DateTime?
+  receiptNumber String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  deletedAt     DateTime?
+  societyId     String
+  flatId        String
+  collectedBy   String?
+  collector     User?            @relation(fields: [collectedBy], references: [id])
+  flat          Flat             @relation(fields: [flatId], references: [id])
+  society       Society          @relation(fields: [societyId], references: [id])
+
+  @@unique([flatId, month, year])
+  @@index([societyId])
+  @@index([flatId])
+  @@index([status])
+  @@index([month, year])
+  @@index([deletedAt])
+}
+
+model Expense {
+  id            String        @id @default(cuid())
+  title         String
+  description   String?
+  amount        Decimal       @db.Decimal(10, 2)
+  category      String
+  vendor        String?
+  invoiceNumber String?
+  status        ExpenseStatus @default(PENDING)
+  approvedBy    String?
+  approvedAt    DateTime?
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  deletedAt     DateTime?
+  societyId     String
+  createdBy     String
+  creator       User          @relation(fields: [createdBy], references: [id])
+  society       Society       @relation(fields: [societyId], references: [id])
+
+  @@index([societyId])
+  @@index([status])
+  @@index([category])
+  @@index([deletedAt])
+}
+
+model Event {
+  id           String      @id @default(cuid())
+  title        String
+  description  String?
+  startDate    DateTime
+  endDate      DateTime
+  location     String?
+  status       EventStatus @default(UPCOMING)
+  isPublic     Boolean     @default(true)
+  maxAttendees Int?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  deletedAt    DateTime?
+  societyId    String
+  createdBy    String
+  creator      User        @relation(fields: [createdBy], references: [id])
+  society      Society     @relation(fields: [societyId], references: [id])
+  participants EventParticipant[]
+
+  @@index([societyId])
+  @@index([startDate])
+  @@index([status])
+  @@index([deletedAt])
+}
+
+model EventParticipant {
+  id            String   @id @default(cuid())
+  maleCount     Int      @default(0)
+  femaleCount   Int      @default(0)
+  childrenCount Int      @default(0)
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  eventId       String
+  residentId    String
+  event         Event    @relation(fields: [eventId], references: [id])
+  resident      Resident @relation(fields: [residentId], references: [id])
+
+  @@unique([eventId, residentId])
+  @@index([eventId])
+  @@index([residentId])
+}
+
+model Notice {
+  id          String         @id @default(cuid())
+  title       String
+  content     String
+  priority    NoticePriority @default(MEDIUM)
+  isPublished Boolean        @default(true)
+  publishedAt DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  deletedAt   DateTime?
+  societyId   String
+  createdBy   String
+  creator     User           @relation(fields: [createdBy], references: [id])
+  society     Society        @relation(fields: [societyId], references: [id])
+
+  @@index([societyId])
+  @@index([priority])
+  @@index([isPublished])
+  @@index([deletedAt])
+}
+
+model Asset {
+  id                String         @id @default(cuid())
+  name              String
+  description       String?
+  category          String
+  totalQuantity     Int            @default(1)
+  availableQuantity Int            @default(1)
+  location          String?
+  condition         String?
+  isActive          Boolean        @default(true)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  deletedAt         DateTime?
+  societyId         String
+  society           Society        @relation(fields: [societyId], references: [id])
+  bookings          AssetBooking[]
+
+  @@index([societyId])
+  @@index([category])
+  @@index([deletedAt])
+}
+
+model AssetBooking {
+  id                 String             @id @default(cuid())
+  quantity           Int                @default(1)
+  status             AssetBookingStatus @default(REQUESTED)
+  borrowDate         DateTime           @default(now())
+  returnDate         DateTime?
+  pickupDate         DateTime?
+  expectedReturnDate DateTime?
+  notes              String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  assetId            String
+  residentId         String
+  societyId          String
+  asset      Asset              @relation(fields: [assetId], references: [id])
+  resident   Resident           @relation(fields: [residentId], references: [id])
+  society    Society            @relation(fields: [societyId], references: [id])
+
+  @@index([assetId])
+  @@index([residentId])
+  @@index([societyId])
+  @@index([status])
+}
+
+model CalendarEvent {
+  id             String    @id @default(cuid())
+  title          String
+  description    String?
+  startDate      DateTime
+  endDate        DateTime
+  allDay         Boolean   @default(false)
+  color          String?
+  recurring      Boolean   @default(false)
+  recurrenceRule String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  societyId      String
+  society        Society   @relation(fields: [societyId], references: [id])
+
+  @@index([societyId])
+  @@index([startDate])
+  @@index([deletedAt])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  title     String
+  message   String
+  type      NotificationType @default(GENERAL)
+  isRead    Boolean          @default(false)
+  link      String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([type])
+}
 
 enum UserRole {
   COMMITTEE_MEMBER
@@ -33,6 +375,7 @@ enum OwnershipType {
 enum CollectionStatus {
   PAID
   PENDING
+  SUBMITTED
   OVERDUE
   PARTIAL
 }
@@ -70,368 +413,16 @@ enum NotificationType {
   EVENT
   NOTICE
   EXPENSE
+  ASSET
   GENERAL
 }
 
-// ─── Core Models ─────────────────────────────────────────────────────
-
-model Society {
-  id          String   @id @default(cuid())
-  name        String
-  address     String
-  city        String
-  state       String
-  pincode     String
-  contactEmail String?
-  contactPhone String?
-  totalFlats  Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  deletedAt   DateTime?
-
-  users       User[]
-  flats       Flat[]
-  residents   Resident[]
-  collections Collection[]
-  expenses    Expense[]
-  events      Event[]
-  notices     Notice[]
-  assets      Asset[]
-  calendarEvents CalendarEvent[]
-  vehicles    Vehicle[]
-  assetBookings AssetBooking[]
-
-  @@index([deletedAt])
-}
-
-// ─── User & Auth ─────────────────────────────────────────────────────
-
-model User {
-  id            String    @id @default(cuid())
-  email         String    @unique
-  passwordHash  String
-  firstName     String
-  lastName      String
-  phone         String?
-  role          UserRole  @default(RESIDENT)
-  avatar        String?
-  isActive      Boolean   @default(true)
-  lastLoginAt   DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
-
-  societyId     String
-  society       Society   @relation(fields: [societyId], references: [id])
-  residentId    String?   @unique
-  resident      Resident? @relation(fields: [residentId], references: [id])
-  notifications Notification[]
-  collections   Collection[]
-  expenses      Expense[]
-  events        Event[]
-  notices       Notice[]
-
-  @@index([societyId])
-  @@index([role])
-  @@index([deletedAt])
-}
-
-// ─── Resident ────────────────────────────────────────────────────────
-
-model Resident {
-  id               String        @id @default(cuid())
-  firstName        String
-  lastName         String
-  email            String?       @unique
-  phone            String
-  gender           Gender?
-  dateOfBirth      DateTime?
-  aadharNumber     String?
-  ownershipType    OwnershipType @default(OWNER)
-  familyMemberCount Int          @default(1)
-  emergencyContact String?
-  emergencyPhone   String?
-  moveInDate       DateTime?
-  isActive         Boolean       @default(true)
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  deletedAt        DateTime?
-
-  societyId        String
-  society          Society       @relation(fields: [societyId], references: [id])
-  flatId           String
-  flat             Flat          @relation(fields: [flatId], references: [id])
-  user             User?
-  vehicles         Vehicle[]
-  assetBookings    AssetBooking[]
-
-  @@index([societyId])
-  @@index([flatId])
-  @@index([deletedAt])
-}
-
-// ─── Flat ────────────────────────────────────────────────────────────
-
-model Flat {
-  id            String     @id @default(cuid())
-  flatNumber    String
-  block         String?
-  floor         Int
-  flatType      String?
-  area          Float?
-  bedrooms      Int?
-  status        FlatStatus @default(OCCUPIED)
-  monthlyDues   Decimal    @default(0) @db.Decimal(10, 2)
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
-  deletedAt     DateTime?
-
-  societyId     String
-  society       Society    @relation(fields: [societyId], references: [id])
-  residents     Resident[]
-  collections   Collection[]
-
-  @@unique([societyId, flatNumber])
-  @@index([societyId])
-  @@index([status])
-  @@index([block])
-  @@index([deletedAt])
-}
-
-// ─── Vehicle ─────────────────────────────────────────────────────────
-
-model Vehicle {
-  id            String      @id @default(cuid())
-  registrationNumber String
-  type          VehicleType @default(CAR)
-  brand         String?
-  model         String?
-  color         String?
-  parkingSlot   String?
-  isActive      Boolean     @default(true)
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  deletedAt     DateTime?
-
-  societyId     String
-  society       Society     @relation(fields: [societyId], references: [id])
-  residentId    String
-  resident      Resident    @relation(fields: [residentId], references: [id])
-
-  @@unique([societyId, registrationNumber])
-  @@index([societyId])
-  @@index([residentId])
-  @@index([deletedAt])
-}
-
-// ─── Collection ──────────────────────────────────────────────────────
-
-model Collection {
-  id            String           @id @default(cuid())
-  amount        Decimal          @db.Decimal(10, 2)
-  dueDate       DateTime
-  paidDate      DateTime?
-  status        CollectionStatus @default(PENDING)
-  month         Int
-  year          Int
-  notes         String?
-  receiptNumber String?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  deletedAt     DateTime?
-
-  societyId     String
-  society       Society          @relation(fields: [societyId], references: [id])
-  flatId        String
-  flat          Flat             @relation(fields: [flatId], references: [id])
-  collectedBy   String?
-  collector     User?            @relation(fields: [collectedBy], references: [id])
-
-  @@unique([flatId, month, year])
-  @@index([societyId])
-  @@index([flatId])
-  @@index([status])
-  @@index([month, year])
-  @@index([deletedAt])
-}
-
-// ─── Expense ─────────────────────────────────────────────────────────
-
-model Expense {
-  id            String       @id @default(cuid())
-  title         String
-  description   String?
-  amount        Decimal      @db.Decimal(10, 2)
-  category      String
-  vendor        String?
-  invoiceNumber String?
-  status        ExpenseStatus @default(PENDING)
-  approvedBy    String?
-  approvedAt    DateTime?
-  paidAt        DateTime?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime     @updatedAt
-  deletedAt     DateTime?
-
-  societyId     String
-  society       Society      @relation(fields: [societyId], references: [id])
-  createdBy     String
-  creator       User         @relation(fields: [createdBy], references: [id])
-
-  @@index([societyId])
-  @@index([status])
-  @@index([category])
-  @@index([deletedAt])
-}
-
-// ─── Event ───────────────────────────────────────────────────────────
-
-model Event {
-  id            String      @id @default(cuid())
-  title         String
-  description   String?
-  startDate     DateTime
-  endDate       DateTime
-  location      String?
-  status        EventStatus @default(UPCOMING)
-  isPublic      Boolean     @default(true)
-  maxAttendees  Int?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  deletedAt     DateTime?
-
-  societyId     String
-  society       Society     @relation(fields: [societyId], references: [id])
-  createdBy     String
-  creator       User        @relation(fields: [createdBy], references: [id])
-
-  @@index([societyId])
-  @@index([startDate])
-  @@index([status])
-  @@index([deletedAt])
-}
-
-// ─── Notice ──────────────────────────────────────────────────────────
-
-model Notice {
-  id            String         @id @default(cuid())
-  title         String
-  content       String
-  priority      NoticePriority @default(MEDIUM)
-  isPublished   Boolean        @default(true)
-  publishedAt   DateTime?
-  expiresAt     DateTime?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  deletedAt     DateTime?
-
-  societyId     String
-  society       Society        @relation(fields: [societyId], references: [id])
-  createdBy     String
-  creator       User           @relation(fields: [createdBy], references: [id])
-
-  @@index([societyId])
-  @@index([priority])
-  @@index([isPublished])
-  @@index([deletedAt])
-}
-
-// ─── Asset ───────────────────────────────────────────────────────────
-
-model Asset {
-  id              String    @id @default(cuid())
-  name            String
-  description     String?
-  category        String
-  totalQuantity   Int       @default(1)
-  availableQuantity Int     @default(1)
-  location        String?
-  condition       String?
-  isActive        Boolean   @default(true)
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  deletedAt       DateTime?
-
-  societyId       String
-  society         Society   @relation(fields: [societyId], references: [id])
-  bookings        AssetBooking[]
-
-  @@index([societyId])
-  @@index([category])
-  @@index([deletedAt])
-}
-
-// ─── Asset Booking ───────────────────────────────────────────────────
-
 enum AssetBookingStatus {
+  REQUESTED
+  APPROVED
   ACTIVE
+  REJECTED
   RETURNED
+  COMPLETED
   CANCELLED
-}
-
-model AssetBooking {
-  id            String            @id @default(cuid())
-  quantity      Int               @default(1)
-  status        AssetBookingStatus @default(ACTIVE)
-  borrowDate    DateTime          @default(now())
-  returnDate    DateTime?
-  notes         String?
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
-
-  assetId       String
-  asset         Asset             @relation(fields: [assetId], references: [id])
-  residentId    String
-  resident      Resident          @relation(fields: [residentId], references: [id])
-  societyId     String
-  society       Society           @relation(fields: [societyId], references: [id])
-
-  @@index([assetId])
-  @@index([residentId])
-  @@index([societyId])
-  @@index([status])
-}
-
-// ─── Calendar Event ──────────────────────────────────────────────────
-
-model CalendarEvent {
-  id            String    @id @default(cuid())
-  title         String
-  description   String?
-  startDate     DateTime
-  endDate       DateTime
-  allDay        Boolean   @default(false)
-  color         String?
-  recurring     Boolean   @default(false)
-  recurrenceRule String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
-
-  societyId     String
-  society       Society   @relation(fields: [societyId], references: [id])
-
-  @@index([societyId])
-  @@index([startDate])
-  @@index([deletedAt])
-}
-
-// ─── Notification ────────────────────────────────────────────────────
-
-model Notification {
-  id            String           @id @default(cuid())
-  title         String
-  message       String
-  type          NotificationType @default(GENERAL)
-  isRead        Boolean          @default(false)
-  link          String?
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-
-  userId        String
-  user          User             @relation(fields: [userId], references: [id])
-
-  @@index([userId])
-  @@index([isRead])
-  @@index([type])
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useSession } from "next-auth/react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ import {
   Megaphone, Plus, Search, AlertCircle, Clock, Calendar, Edit, Trash2, AlertTriangle, RefreshCw, Loader2,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/page-header";
 import { toast } from "sonner";
 
 interface Notice {
@@ -30,6 +32,9 @@ interface Notice {
 interface FormErrors { title?: string; content?: string; [key: string]: string | undefined; }
 
 export default function NoticesPage() {
+  const { data: session } = useSession();
+  const isCommittee = session?.user?.role === "COMMITTEE_MEMBER";
+
   const [notices, setNotices] = useState<Notice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -124,8 +129,8 @@ export default function NoticesPage() {
   if (error && !loading) {
     return (
       <div className="space-y-6">
-        <div><h1 className="text-2xl font-bold text-gray-900">Notices</h1><p className="text-gray-500">View and manage society notices</p></div>
-        <Card className="border-red-200 bg-red-50/50"><CardContent className="flex flex-col items-center justify-center py-12"><AlertTriangle className="w-8 h-8 text-red-600 mb-4" /><h2 className="text-lg font-semibold text-red-900 mb-2">Failed to Load Notices</h2><p className="text-red-700 text-sm text-center max-w-md mb-6">{error}</p><Button onClick={fetchNotices} variant="outline" className="border-red-300 text-red-700 hover:bg-red-100"><RefreshCw className="w-4 h-4 mr-2" /> Try Again</Button></CardContent></Card>
+        <PageHeader title="Notices" description="Society notices" icon={Megaphone} />
+        <Card className="border-red-100 bg-red-50/40"><CardContent className="flex flex-col items-center justify-center py-12"><AlertTriangle className="w-8 h-8 text-red-600 mb-4" /><h2 className="text-lg font-semibold text-red-900 mb-2">Failed to Load Notices</h2><p className="text-red-700 text-sm text-center max-w-md mb-6">{error}</p><Button onClick={fetchNotices} variant="outline" className="border-red-300 text-red-700 hover:bg-red-100"><RefreshCw className="w-4 h-4 mr-2" /> Try Again</Button></CardContent></Card>
       </div>
     );
   }
@@ -165,8 +170,8 @@ export default function NoticesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div><h1 className="text-2xl font-bold text-gray-900">Notices</h1><p className="text-gray-500">View and manage society notices</p></div>
+      <PageHeader title="Notices" description={isCommittee ? "View and manage society notices" : "View society notices"} icon={Megaphone}>
+        {isCommittee && (
         <Dialog open={isAddDialogOpen} onOpenChange={(o) => { setIsAddDialogOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Create Notice</Button></DialogTrigger>
           <DialogContent className="max-w-2xl">
@@ -178,7 +183,8 @@ export default function NoticesPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+        )}
+      </PageHeader>
 
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-md"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" /><Input placeholder="Search notices..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" /></div>
@@ -206,14 +212,18 @@ export default function NoticesPage() {
                   </div>
                   <div className="flex items-center gap-1">
                     <Badge variant={getPriorityColor(notice.priority)}>{notice.priority}</Badge>
-                    <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditDialog(notice)}><Edit className="h-3.5 w-3.5" /></Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"><Trash2 className="h-3.5 w-3.5" /></Button></AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader><AlertDialogTitle>Delete "{notice.title}"?</AlertDialogTitle><AlertDialogDescription>This will soft-delete this notice.</AlertDialogDescription></AlertDialogHeader>
-                        <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDelete(notice.id)} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction></AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                    {isCommittee && (
+                      <>
+                        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => openEditDialog(notice)}><Edit className="h-3.5 w-3.5" /></Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="h-7 w-7 text-red-600 hover:text-red-700 hover:bg-red-50"><Trash2 className="h-3.5 w-3.5" /></Button></AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader><AlertDialogTitle>Delete "{notice.title}"?</AlertDialogTitle><AlertDialogDescription>This will soft-delete this notice.</AlertDialogDescription></AlertDialogHeader>
+                            <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDelete(notice.id)} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction></AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </>
+                    )}
                   </div>
                 </div>
                 <p className="text-gray-600 mb-4 whitespace-pre-wrap">{notice.content}</p>

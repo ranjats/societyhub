@@ -17,11 +17,14 @@ export function LoadingState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center p-12 gap-3",
+        "flex flex-col items-center justify-center p-12 gap-4",
         className
       )}
     >
-      <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="relative">
+        <div className="absolute -inset-2 rounded-full bg-primary/15 blur-lg animate-pulse-soft" />
+        <Loader2 className="relative w-8 h-8 animate-spin text-primary" />
+      </div>
       <p className="text-sm text-muted-foreground">{message}</p>
     </div>
   );
@@ -49,12 +52,18 @@ export function EmptyState({
         className
       )}
     >
-      {icon && <div className="mb-4 text-gray-300">{icon}</div>}
-      <p className="text-gray-500 font-medium">{title}</p>
-      {description && (
-        <p className="text-sm text-gray-400 mt-1">{description}</p>
+      {icon && (
+        <div className="mb-5 flex items-center justify-center w-16 h-16 rounded-2xl bg-muted/60 text-muted-foreground/40">
+          {icon}
+        </div>
       )}
-      {action && <div className="mt-4">{action}</div>}
+      <p className="text-muted-foreground font-medium">{title}</p>
+      {description && (
+        <p className="text-sm text-muted-foreground/70 mt-1.5 text-center max-w-sm">
+          {description}
+        </p>
+      )}
+      {action && <div className="mt-5">{action}</div>}
     </div>
   );
 }
@@ -75,21 +84,23 @@ export function ErrorState({
   return (
     <div
       className={cn(
-        "border-red-200 bg-red-50/50 rounded-lg",
+        "border-red-100 bg-red-50/40 rounded-xl",
         className
       )}
     >
       <div className="flex flex-col items-center justify-center p-12">
-        <AlertTriangle className="w-8 h-8 text-red-600 mb-4" />
+        <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-red-100 mb-5">
+          <AlertTriangle className="w-7 h-7 text-red-600" />
+        </div>
         <h2 className="text-lg font-semibold text-red-900 mb-2">{title}</h2>
-        <p className="text-red-700 text-sm text-center max-w-md mb-6">
+        <p className="text-red-700/80 text-sm text-center max-w-md mb-6">
           {message}
         </p>
         {onRetry && (
           <Button
             onClick={onRetry}
             variant="outline"
-            className="border-red-300 text-red-700 hover:bg-red-100"
+            className="border-red-300 text-red-700 hover:bg-red-50"
           >
             <RefreshCw className="w-4 h-4 mr-2" /> Try Again
           </Button>

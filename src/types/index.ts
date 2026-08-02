@@ -77,10 +77,12 @@ export interface Collection {
   amount: number;
   dueDate: Date;
   paidDate?: Date;
-  status: "PAID" | "PENDING" | "OVERDUE" | "PARTIAL";
+  status: "PAID" | "PENDING" | "SUBMITTED" | "OVERDUE" | "PARTIAL";
   month: number;
   year: number;
   notes?: string;
+  paymentMethod?: string;
+  submittedAt?: Date;
   receiptNumber?: string;
   flatId: string;
   societyId: string;
@@ -116,6 +118,18 @@ export interface Event {
   createdAt: Date;
 }
 
+export interface EventParticipant {
+  id: string;
+  maleCount: number;
+  femaleCount: number;
+  childrenCount: number;
+  notes?: string;
+  eventId: string;
+  residentId: string;
+  resident?: Pick<Resident, "id" | "firstName" | "lastName"> & { flat?: Flat };
+  createdAt: Date;
+}
+
 export interface Notice {
   id: string;
   title: string;
@@ -143,6 +157,30 @@ export interface Asset {
   createdAt: Date;
 }
 
+export type AssetBookingStatus =
+  | "REQUESTED"
+  | "APPROVED"
+  | "ACTIVE"
+  | "REJECTED"
+  | "RETURNED"
+  | "COMPLETED"
+  | "CANCELLED";
+
+export interface AssetBooking {
+  id: string;
+  quantity: number;
+  status: AssetBookingStatus;
+  borrowDate: Date;
+  returnDate?: Date;
+  pickupDate?: Date;
+  expectedReturnDate?: Date;
+  notes?: string;
+  assetId: string;
+  residentId: string;
+  societyId: string;
+  createdAt: Date;
+}
+
 export interface CalendarEvent {
   id: string;
   title: string;
@@ -159,7 +197,7 @@ export interface Notification {
   id: string;
   title: string;
   message: string;
-  type: "COLLECTION" | "EVENT" | "NOTICE" | "EXPENSE" | "GENERAL";
+  type: "COLLECTION" | "EVENT" | "NOTICE" | "EXPENSE" | "ASSET" | "GENERAL";
   isRead: boolean;
   link?: string;
   userId: string;
