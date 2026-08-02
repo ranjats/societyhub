@@ -14,7 +14,7 @@ export function MobileCard({
   return (
     <div
       className={cn(
-        "rounded-lg border bg-card p-4 shadow-sm space-y-2",
+        "rounded-xl border bg-card p-4 shadow-soft space-y-2 transition-shadow hover:shadow-card",
         className
       )}
     >

@@ -1,5 +1,6 @@
 import { auth } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 // Role hierarchy for permission checking
 const ROLE_HIERARCHY: Record<string, string[]> = {
@@ -67,6 +68,7 @@ const ROLE_PERMISSIONS: Record<string, string[]> = {
     "vehicles:view",
     "vehicles:create",
     "vehicles:edit",
+    "assets:view",
     "notifications:view",
   ],
 };
@@ -169,6 +171,23 @@ export async function requirePermission(
   }
 
   return { context: authResult.context };
+}
+
+/**
+ * Resolve the logged-in user's resident ID, falling back to the database
+ * when the session predates the resident link. Returns null when the user
+ * has no linked resident record.
+ */
+export async function resolveResidentId(
+  context: AuthContext
+): Promise<string | null> {
+  if (context.residentId) return context.residentId;
+  if (!context.userId) return null;
+  const user = await prisma.user.findUnique({
+    where: { id: context.userId },
+    select: { residentId: true },
+  });
+  return user?.residentId ?? null;
 }
 
 /**

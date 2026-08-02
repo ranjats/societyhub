@@ -10,19 +10,19 @@ interface JWTPayload {
   [key: string]: unknown;
 }
 
-const publicPaths = ["/login", "/signup", "/api/auth"];
+const publicPaths = ["/login", "/signup", "/reset-password", "/api/auth"];
 const unauthorizedPath = "/unauthorized";
 
 // Role-based route access rules
 const roleRouteAccess: Record<string, string[]> = {
   COMMITTEE_MEMBER: [
-    "/dashboard", "/residents", "/flats", "/collections", "/expenses",
+    "/dashboard", "/residents", "/collections", "/expenses",
     "/events", "/notices", "/assets", "/calendar", "/vehicles",
     "/reports", "/notifications", "/users", "/settings", "/profile", "/payments",
   ],
   RESIDENT: [
     "/dashboard", "/profile", "/payments", "/events", "/notices",
-    "/calendar", "/vehicles", "/notifications",
+    "/calendar", "/vehicles", "/assets", "/notifications",
   ],
 };
 

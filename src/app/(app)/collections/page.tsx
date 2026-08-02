@@ -22,19 +22,39 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  IndianRupee, Plus, Search, CheckCircle2, Clock, TrendingUp, Edit, Trash2, AlertTriangle, RefreshCw, Loader2,
+  IndianRupee, Plus, Search, CheckCircle2, Clock, TrendingUp, Edit, Trash2,
+  AlertTriangle, RefreshCw, Loader2, Hourglass, XCircle, CheckCheck,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/page-header";
 import { toast } from "sonner";
 
 interface Collection {
   id: string; amount: number; dueDate: string; paidDate: string | null; status: string;
-  month: number; year: number; receiptNumber: string | null; flat: { id: string; flatNumber: string; floor: number };
+  month: number; year: number; receiptNumber: string | null; paymentMethod: string | null; notes: string | null;
+  flat: { id: string; flatNumber: string; floor: number };
 }
 
 interface Flat { id: string; flatNumber: string; floor: number }
 
 interface FormErrors { flatId?: string; month?: string; year?: string; amount?: string; }
+
+const getMonthName = (m: number) => new Date(2024, m - 1).toLocaleString("default", { month: "long" });
+
+const getStatusBadge = (status: string): { variant: "success" | "warning" | "info" | "destructive" | "secondary"; label: string } => {
+  switch (status) {
+    case "PAID":
+      return { variant: "success", label: "Paid" };
+    case "SUBMITTED":
+      return { variant: "info", label: "Awaiting Approval" };
+    case "PENDING":
+      return { variant: "warning", label: "Pending" };
+    case "OVERDUE":
+      return { variant: "destructive", label: "Overdue" };
+    default:
+      return { variant: "secondary", label: status };
+  }
+};
 
 export default function CollectionsPage() {
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -46,6 +66,7 @@ export default function CollectionsPage() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [approvingId, setApprovingId] = useState<string | null>(null);
   const [editingCollection, setEditingCollection] = useState<Collection | null>(null);
   const [formErrors, setFormErrors] = useState<FormErrors>({});
 
@@ -137,6 +158,36 @@ export default function CollectionsPage() {
     } catch (err) { toast.error(err instanceof Error ? err.message : "Failed to delete collection"); }
   };
 
+  const handleApprove = async (id: string) => {
+    try {
+      setApprovingId(id);
+      const res = await fetch(`/api/collections/${id}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "approve" }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error);
+      toast.success("Payment approved! The resident has been notified.");
+      fetchData();
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Failed to approve payment"); }
+    finally { setApprovingId(null); }
+  };
+
+  const handleReject = async (id: string) => {
+    try {
+      setApprovingId(id);
+      const res = await fetch(`/api/collections/${id}`, {
+        method: "PUT", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "reject" }),
+      });
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error);
+      toast.success("Submission rejected. The resident has been notified.");
+      fetchData();
+    } catch (err) { toast.error(err instanceof Error ? err.message : "Failed to reject submission"); }
+    finally { setApprovingId(null); }
+  };
+
   const filteredCollections = collections.filter(
     (c) => (statusFilter === "ALL" || c.status === statusFilter) &&
       (c.flat.flatNumber.toLowerCase().includes(searchQuery.toLowerCase()) || c.receiptNumber?.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -144,13 +195,13 @@ export default function CollectionsPage() {
 
   const { currentPage, setCurrentPage, totalPages, paginatedItems, totalItems } = usePagination(filteredCollections, 15);
   const totalCollected = filteredCollections.filter((c) => c.status === "PAID").reduce((s, c) => s + Number(c.amount), 0);
-  const totalPending = filteredCollections.filter((c) => c.status === "PENDING" || c.status === "OVERDUE").reduce((s, c) => s + Number(c.amount), 0);
-  const getMonthName = (m: number) => new Date(2024, m - 1).toLocaleString("default", { month: "long" });
+  const totalSubmitted = filteredCollections.filter((c) => c.status === "SUBMITTED").reduce((s, c) => s + Number(c.amount), 0);
+  const totalOutstanding = filteredCollections.filter((c) => c.status === "PENDING" || c.status === "OVERDUE").reduce((s, c) => s + Number(c.amount), 0);
 
   if (error && !loading) {
     return (
       <div className="space-y-6">
-        <div><h1 className="text-2xl font-bold text-gray-900">Collections</h1><p className="text-gray-500">Track and manage maintenance payments</p></div>
+        <PageHeader title="Collections" description="Track and manage maintenance payments" icon={IndianRupee} />
         <EmptyState
           icon={<AlertTriangle className="w-12 h-12" />}
           title="Failed to Load Collections"
@@ -218,8 +269,7 @@ export default function CollectionsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div><h1 className="text-2xl font-bold text-gray-900">Collections</h1><p className="text-gray-500">Track and manage maintenance payments</p></div>
+      <PageHeader title="Collections" description="Track and manage maintenance payments" icon={IndianRupee}>
         <Dialog open={isAddDialogOpen} onOpenChange={(o) => { setIsAddDialogOpen(o); if (!o) resetForm(); }}>
           <DialogTrigger asChild><Button><Plus className="w-4 h-4 mr-2" /> Record Payment</Button></DialogTrigger>
           <DialogContent className="max-h-[90vh] overflow-y-auto">
@@ -231,17 +281,28 @@ export default function CollectionsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageHeader>
 
-      <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-        <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="flex items-center justify-center w-10 h-10 rounded-lg bg-emerald-100"><CheckCircle2 className="w-5 h-5 text-emerald-600" /></div><div><p className="text-sm text-gray-500">Collected</p><p className="text-lg font-bold text-emerald-600">{formatCurrency(totalCollected)}</p></div></div></CardContent></Card>
-        <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="flex items-center justify-center w-10 h-10 rounded-lg bg-amber-100"><Clock className="w-5 h-5 text-amber-600" /></div><div><p className="text-sm text-gray-500">Pending</p><p className="text-lg font-bold text-amber-600">{formatCurrency(totalPending)}</p></div></div></CardContent></Card>
-        <Card><CardContent className="p-4"><div className="flex items-center gap-3"><div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100"><TrendingUp className="w-5 h-5 text-blue-600" /></div><div><p className="text-sm text-gray-500">Collection Rate</p><p className="text-lg font-bold text-blue-600">{filteredCollections.length > 0 ? Math.round((filteredCollections.filter((c) => c.status === "PAID").length / filteredCollections.length) * 100) : 0}%</p></div></div></CardContent></Card>
+      <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="card-hover"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/15 to-teal-500/15 border border-emerald-500/10"><CheckCircle2 className="w-5 h-5 text-emerald-600" /></div><div><p className="text-sm text-muted-foreground">Collected</p><p className="text-lg font-bold text-emerald-600">{formatCurrency(totalCollected)}</p></div></div></CardContent></Card>
+        <Card className="card-hover"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500/15 to-indigo-500/15 border border-blue-500/10"><Hourglass className="w-5 h-5 text-blue-600" /></div><div><p className="text-sm text-muted-foreground">Awaiting Approval</p><p className="text-lg font-bold text-blue-600">{formatCurrency(totalSubmitted)}</p></div></div></CardContent></Card>
+        <Card className="card-hover"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-amber-500/15 to-orange-500/15 border border-amber-500/10"><Clock className="w-5 h-5 text-amber-600" /></div><div><p className="text-sm text-muted-foreground">Outstanding</p><p className="text-lg font-bold text-amber-600">{formatCurrency(totalOutstanding)}</p></div></div></CardContent></Card>
+        <Card className="card-hover"><CardContent className="p-4"><div className="flex items-center gap-3"><div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/15 border border-violet-500/10"><TrendingUp className="w-5 h-5 text-violet-600" /></div><div><p className="text-sm text-muted-foreground">Collection Rate</p><p className="text-lg font-bold text-violet-600">{filteredCollections.length > 0 ? Math.round((filteredCollections.filter((c) => c.status === "PAID").length / filteredCollections.length) * 100) : 0}%</p></div></div></CardContent></Card>
       </div>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div className="relative flex-1 w-full max-w-md"><Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" /><Input placeholder="Search by flat or receipt..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10" /></div>
-        <div className="flex items-center gap-2 flex-wrap">{["ALL", "PAID", "PENDING", "OVERDUE"].map((s) => <Button key={s} variant={statusFilter === s ? "default" : "outline"} size="sm" onClick={() => setStatusFilter(s)}>{s === "ALL" ? "All" : s}</Button>)}</div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {[
+            { value: "ALL", label: "All" },
+            { value: "SUBMITTED", label: "Awaiting Approval" },
+            { value: "PAID", label: "Paid" },
+            { value: "PENDING", label: "Pending" },
+            { value: "OVERDUE", label: "Overdue" },
+          ].map((s) => (
+            <Button key={s.value} variant={statusFilter === s.value ? "default" : "outline"} size="sm" onClick={() => setStatusFilter(s.value)}>{s.label}</Button>
+          ))}
+        </div>
       </div>
 
       <Card>
@@ -259,64 +320,121 @@ export default function CollectionsPage() {
               {/* Desktop Table */}
               <div className="hidden md:block">
                 <Table>
-                  <TableHeader><TableRow><TableHead>Flat</TableHead><TableHead>Period</TableHead><TableHead>Amount</TableHead><TableHead>Due Date</TableHead><TableHead>Status</TableHead><TableHead>Receipt</TableHead><TableHead className="w-[100px]">Actions</TableHead></TableRow></TableHeader>
+                  <TableHeader><TableRow><TableHead>Flat</TableHead><TableHead>Period</TableHead><TableHead>Amount</TableHead><TableHead>Method</TableHead><TableHead>Due Date</TableHead><TableHead>Status</TableHead><TableHead>Receipt</TableHead><TableHead className="w-[140px]">Actions</TableHead></TableRow></TableHeader>
                   <TableBody>
-                    {paginatedItems.map((c) => (
-                      <TableRow key={c.id}>
-                        <TableCell><span className="font-medium">Flat {c.flat.flatNumber}</span></TableCell>
-                        <TableCell>{getMonthName(c.month)} {c.year}</TableCell>
-                        <TableCell><span className="font-semibold">{formatCurrency(Number(c.amount))}</span></TableCell>
-                        <TableCell className="text-muted-foreground">{formatDate(c.dueDate)}</TableCell>
-                        <TableCell><Badge variant={c.status === "PAID" ? "success" : c.status === "PENDING" ? "warning" : "destructive"}>{c.status}</Badge></TableCell>
-                        <TableCell>{c.receiptNumber || "-"}</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(c)}><Edit className="h-4 w-4" /></Button>
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader><AlertDialogTitle>Delete this collection record?</AlertDialogTitle><AlertDialogDescription>This will remove the payment record for Flat {c.flat.flatNumber} ({getMonthName(c.month)} {c.year}).</AlertDialogDescription></AlertDialogHeader>
-                                <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDelete(c.id)} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction></AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {paginatedItems.map((c) => {
+                      const badge = getStatusBadge(c.status);
+                      return (
+                        <TableRow key={c.id}>
+                          <TableCell>
+                            <span className="font-medium">Flat {c.flat.flatNumber}</span>
+                            {c.notes && c.status === "SUBMITTED" && (
+                              <p className="text-xs text-muted-foreground mt-0.5 max-w-[200px] truncate" title={c.notes}>{c.notes}</p>
+                            )}
+                          </TableCell>
+                          <TableCell>{getMonthName(c.month)} {c.year}</TableCell>
+                          <TableCell><span className="font-semibold">{formatCurrency(Number(c.amount))}</span></TableCell>
+                          <TableCell>{c.paymentMethod || "-"}</TableCell>
+                          <TableCell className="text-muted-foreground">{formatDate(c.dueDate)}</TableCell>
+                          <TableCell><Badge variant={badge.variant}>{badge.label}</Badge></TableCell>
+                          <TableCell>{c.receiptNumber || "-"}</TableCell>
+                          <TableCell>
+                            {c.status === "SUBMITTED" ? (
+                              <div className="flex items-center gap-1">
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="outline" className="h-8 text-emerald-700 border-emerald-300 hover:bg-emerald-50" disabled={approvingId === c.id}>
+                                      <CheckCheck className="w-4 h-4 mr-1" /> Approve
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader><AlertDialogTitle>Approve this payment?</AlertDialogTitle><AlertDialogDescription>Flat {c.flat.flatNumber} submitted {formatCurrency(Number(c.amount))} for {getMonthName(c.month)} {c.year}. Approving marks it as paid and notifies the resident.</AlertDialogDescription></AlertDialogHeader>
+                                    <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleApprove(c.id)} className="bg-emerald-600 hover:bg-emerald-700">Approve</AlertDialogAction></AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button size="sm" variant="outline" className="h-8 text-red-600 border-red-300 hover:bg-red-50" disabled={approvingId === c.id}>
+                                      <XCircle className="w-4 h-4 mr-1" /> Reject
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader><AlertDialogTitle>Reject this submission?</AlertDialogTitle><AlertDialogDescription>This will revert the payment for Flat {c.flat.flatNumber} ({getMonthName(c.month)} {c.year}) to pending and notify the resident.</AlertDialogDescription></AlertDialogHeader>
+                                    <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleReject(c.id)} className="bg-red-600 hover:bg-red-700">Reject</AlertDialogAction></AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            ) : (
+                              <div className="flex items-center gap-1">
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(c)}><Edit className="h-4 w-4" /></Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader><AlertDialogTitle>Delete this collection record?</AlertDialogTitle><AlertDialogDescription>This will remove the payment record for Flat {c.flat.flatNumber} ({getMonthName(c.month)} {c.year}).</AlertDialogDescription></AlertDialogHeader>
+                                    <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDelete(c.id)} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction></AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </div>
 
               {/* Mobile Cards */}
               <div className="md:hidden p-4 space-y-3">
-                {paginatedItems.map((c) => (
-                  <MobileCard key={c.id}>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">Flat {c.flat.flatNumber}</p>
-                        <p className="text-sm text-gray-500">{getMonthName(c.month)} {c.year}</p>
+                {paginatedItems.map((c) => {
+                  const badge = getStatusBadge(c.status);
+                  return (
+                    <MobileCard key={c.id}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="font-medium">Flat {c.flat.flatNumber}</p>
+                          <p className="text-sm text-gray-500">{getMonthName(c.month)} {c.year}</p>
+                          {c.notes && c.status === "SUBMITTED" && (
+                            <p className="text-xs text-muted-foreground mt-1 truncate max-w-[220px]" title={c.notes}>{c.notes}</p>
+                          )}
+                        </div>
+                        <div className="text-right">
+                          <p className="font-semibold">{formatCurrency(Number(c.amount))}</p>
+                          <Badge variant={badge.variant} className="text-xs">{badge.label}</Badge>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-semibold">{formatCurrency(Number(c.amount))}</p>
-                        <Badge variant={c.status === "PAID" ? "success" : c.status === "PENDING" ? "warning" : "destructive"} className="text-xs">{c.status}</Badge>
+                      <div className="grid grid-cols-2 gap-2 pt-2 border-t">
+                        <MobileCardRow label="Method">{c.paymentMethod || "-"}</MobileCardRow>
+                        <MobileCardRow label="Receipt">{c.receiptNumber || "-"}</MobileCardRow>
                       </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t">
-                      <MobileCardRow label="Due Date">{formatDate(c.dueDate)}</MobileCardRow>
-                      <MobileCardRow label="Receipt">{c.receiptNumber || "-"}</MobileCardRow>
-                    </div>
-                    <div className="flex items-center justify-end gap-1 pt-2 border-t">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(c)}><Edit className="h-4 w-4" /></Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 text-red-600"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader><AlertDialogTitle>Delete this collection record?</AlertDialogTitle><AlertDialogDescription>This will remove the payment record for Flat {c.flat.flatNumber} ({getMonthName(c.month)} {c.year}).</AlertDialogDescription></AlertDialogHeader>
-                          <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDelete(c.id)} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction></AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </MobileCard>
-                ))}
+                      {c.status === "SUBMITTED" ? (
+                        <div className="flex items-center justify-end gap-2 pt-2 border-t">
+                          <Button size="sm" variant="outline" className="text-emerald-700 border-emerald-300 hover:bg-emerald-50" disabled={approvingId === c.id} onClick={() => handleApprove(c.id)}>
+                            <CheckCheck className="w-4 h-4 mr-1" /> Approve
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild><Button size="sm" variant="outline" className="text-red-600 border-red-300 hover:bg-red-50" disabled={approvingId === c.id}><XCircle className="w-4 h-4 mr-1" /> Reject</Button></AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader><AlertDialogTitle>Reject this submission?</AlertDialogTitle><AlertDialogDescription>This will revert the payment for Flat {c.flat.flatNumber} ({getMonthName(c.month)} {c.year}) to pending.</AlertDialogDescription></AlertDialogHeader>
+                              <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleReject(c.id)} className="bg-red-600 hover:bg-red-700">Reject</AlertDialogAction></AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-end gap-1 pt-2 border-t">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditDialog(c)}><Edit className="h-4 w-4" /></Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="h-8 w-8 text-red-600"><Trash2 className="h-4 w-4" /></Button></AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader><AlertDialogTitle>Delete this collection record?</AlertDialogTitle><AlertDialogDescription>This will remove the payment record for Flat {c.flat.flatNumber} ({getMonthName(c.month)} {c.year}).</AlertDialogDescription></AlertDialogHeader>
+                              <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDelete(c.id)} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction></AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      )}
+                    </MobileCard>
+                  );
+                })}
               </div>
 
               <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={totalItems} />

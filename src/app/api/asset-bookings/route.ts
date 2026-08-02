@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
-import { requireAuth } from "@/lib/authorization";
+import { requireAuth, resolveResidentId } from "@/lib/authorization";
 import prisma from "@/lib/prisma";
+import { assetBookingSchema, assetRequestSchema } from "@/lib/validations";
+import { notifyUsers, getCommitteeMemberIds } from "@/lib/notifications";
+
+const formatDate = (d: Date) =>
+  d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
 export async function GET() {
   try {
@@ -9,15 +14,27 @@ export async function GET() {
     const { context } = authResult;
 
     const where: any = { societyId: context.societyId };
-    if (context.role === "RESIDENT" && context.residentId) {
-      where.residentId = context.residentId;
+
+    // Residents only see their own bookings
+    if (context.role === "RESIDENT") {
+      const residentId = await resolveResidentId(context);
+      if (!residentId) {
+        return NextResponse.json(
+          {
+            error:
+              "Your account is not linked to a flat yet. Please contact the committee to complete your profile.",
+          },
+          { status: 400 }
+        );
+      }
+      where.residentId = residentId;
     }
 
     const bookings = await prisma.assetBooking.findMany({
       where,
       include: {
         asset: { select: { id: true, name: true, category: true } },
-        resident: { select: { firstName: true, lastName: true, phone: true } },
+        resident: { select: { firstName: true, lastName: true, phone: true, flat: { select: { flatNumber: true } } } },
       },
       orderBy: { createdAt: "desc" },
     });
@@ -35,11 +52,86 @@ export async function POST(request: Request) {
     const { context } = authResult;
 
     const body = await request.json();
-    const { assetId, quantity = 1, notes } = body;
 
-    if (!assetId) {
-      return NextResponse.json({ error: "Asset ID is required" }, { status: 400 });
+    // ---- Resident raises an asset request (awaits committee approval) ----
+    if (context.role === "RESIDENT") {
+      const validated = assetRequestSchema.safeParse(body);
+      if (!validated.success) {
+        return NextResponse.json(
+          { error: "Validation failed", details: validated.error.flatten().fieldErrors },
+          { status: 400 }
+        );
+      }
+      const { assetId, quantity, notes, pickupDate, expectedReturnDate } = validated.data;
+
+      const residentId = await resolveResidentId(context);
+      if (!residentId) {
+        return NextResponse.json(
+          {
+            error:
+              "Your account is not linked to a flat yet. Please contact the committee to complete your profile.",
+          },
+          { status: 400 }
+        );
+      }
+
+      const asset = await prisma.asset.findFirst({
+        where: { id: assetId, societyId: context.societyId, deletedAt: null },
+      });
+      if (!asset) {
+        return NextResponse.json({ error: "Asset not found" }, { status: 404 });
+      }
+      if (!asset.isActive) {
+        return NextResponse.json({ error: "This asset is not available for booking" }, { status: 400 });
+      }
+      if (asset.availableQuantity < quantity) {
+        return NextResponse.json(
+          { error: `Only ${asset.availableQuantity} unit(s) available` },
+          { status: 400 }
+        );
+      }
+
+      const booking = await prisma.assetBooking.create({
+        data: {
+          assetId,
+          residentId,
+          quantity,
+          notes: notes || null,
+          pickupDate,
+          expectedReturnDate,
+          societyId: context.societyId,
+          status: "REQUESTED",
+        },
+        include: {
+          asset: { select: { name: true } },
+          resident: { select: { firstName: true, lastName: true } },
+        },
+      });
+
+      // Notify all committee members about the new request
+      const committeeIds = await getCommitteeMemberIds(context.societyId);
+      await notifyUsers({
+        userIds: committeeIds,
+        title: "New Asset Request",
+        message: `${booking.resident.firstName} ${booking.resident.lastName} requested ${quantity} × ${booking.asset.name} (pickup ${formatDate(
+          pickupDate
+        )}, return ${formatDate(expectedReturnDate)}). Review and approve it.`,
+        type: "ASSET",
+        link: "/assets",
+      });
+
+      return NextResponse.json(booking, { status: 201 });
     }
+
+    // ---- Committee records a direct borrow ----
+    const validated = assetBookingSchema.safeParse(body);
+    if (!validated.success) {
+      return NextResponse.json(
+        { error: "Validation failed", details: validated.error.flatten().fieldErrors },
+        { status: 400 }
+      );
+    }
+    const { assetId, quantity, notes, pickupDate, expectedReturnDate } = validated.data;
 
     // Get the asset and verify it belongs to the same society
     const asset = await prisma.asset.findFirst({
@@ -66,7 +158,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Resident ID is required" }, { status: 400 });
     }
 
-    // Verify resident belongs to the same society
     const resident = await prisma.resident.findFirst({
       where: { id: residentId, societyId: context.societyId },
     });
@@ -82,8 +173,11 @@ export async function POST(request: Request) {
           residentId,
           quantity,
           notes,
+          pickupDate,
+          expectedReturnDate,
           societyId: context.societyId,
           status: "ACTIVE",
+          borrowDate: new Date(),
         },
         include: {
           asset: { select: { name: true } },

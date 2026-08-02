@@ -20,8 +20,11 @@ export default function AppLayout({
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-mesh flex items-center justify-center">
+        <div className="relative">
+          <div className="absolute -inset-4 rounded-full bg-primary/20 blur-2xl animate-pulse-soft" />
+          <div className="relative animate-spin rounded-full h-9 w-9 border-[3px] border-primary/20 border-t-primary" />
+        </div>
       </div>
     );
   }
@@ -33,7 +36,7 @@ export default function AppLayout({
   const role = (session.user as Record<string, unknown>).role as string || "RESIDENT";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-mesh">
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:fixed lg:inset-y-0 lg:z-50">
         <Sidebar
@@ -47,10 +50,10 @@ export default function AppLayout({
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50">
           <div
-            className="fixed inset-0 bg-black/50"
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="fixed inset-y-0 left-0 w-64">
+          <div className="fixed inset-y-0 left-0 w-72 animate-fade-in">
             <Sidebar
               role={role}
               isMobile={true}
@@ -64,14 +67,14 @@ export default function AppLayout({
       <div
         className={cn(
           "transition-all duration-300",
-          sidebarCollapsed ? "lg:ml-16" : "lg:ml-64"
+          sidebarCollapsed ? "lg:ml-[76px]" : "lg:ml-64"
         )}
       >
         <Header
           user={session.user}
           onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
         />
-        <main className="p-4 lg:p-6">{children}</main>
+        <main className="p-4 lg:p-6 max-w-[1600px] mx-auto">{children}</main>
       </div>
     </div>
   );

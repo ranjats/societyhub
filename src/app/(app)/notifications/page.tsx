@@ -16,6 +16,7 @@ import {
   Info,
 } from "lucide-react";
 import { formatDateTime } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/page-header";
 import { toast } from "sonner";
 
 interface Notification {
@@ -100,22 +101,22 @@ export default function NotificationsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Notifications</h1>
-          <p className="text-gray-500">
-            {unreadCount > 0
-              ? `You have ${unreadCount} unread notifications`
-              : "You're all caught up!"}
-          </p>
-        </div>
+      <PageHeader
+        title="Notifications"
+        description={
+          unreadCount > 0
+            ? `You have ${unreadCount} unread notifications`
+            : "You're all caught up!"
+        }
+        icon={Bell}
+      >
         {unreadCount > 0 && (
           <Button variant="outline" onClick={markAllAsRead}>
             <CheckCheck className="w-4 h-4 mr-2" />
             Mark all as read
           </Button>
         )}
-      </div>
+      </PageHeader>
 
       {/* Filters */}
       <div className="flex items-center gap-2">
