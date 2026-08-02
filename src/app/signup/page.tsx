@@ -97,16 +97,18 @@ export default function SignupPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
-              <Building2 className="w-8 h-8 text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-auth p-4">
+        <div className="w-full max-w-md relative z-10">
+          <div className="text-center mb-8 animate-fade-up">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-2 text-white shadow-glow mb-4">
+              <Building2 className="w-8 h-8" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-900">SocietyHub</h1>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+              Society<span className="text-gradient">Hub</span>
+            </h1>
           </div>
 
-          <Card className="shadow-lg border-0">
+          <Card className="shadow-card border-border/70 backdrop-blur-sm animate-scale-in">
             <CardHeader className="space-y-1 pb-4">
               <CardTitle className="text-xl text-center text-green-600">Registration Successful!</CardTitle>
             </CardHeader>
@@ -135,17 +137,19 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
-            <Building2 className="w-8 h-8 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-auth p-4">
+      <div className="w-full max-w-md relative z-10">
+        <div className="text-center mb-8 animate-fade-up">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-2 text-white shadow-glow mb-4">
+            <Building2 className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">SocietyHub</h1>
-          <p className="text-gray-500 mt-2">Resident Registration</p>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Society<span className="text-gradient">Hub</span>
+          </h1>
+          <p className="text-muted-foreground mt-2">Resident Registration</p>
         </div>
 
-        <Card className="shadow-lg border-0">
+        <Card className="shadow-card border-border/70 backdrop-blur-sm animate-scale-in">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl text-center">Create Account</CardTitle>
             <CardDescription className="text-center">

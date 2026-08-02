@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import {
   Shield,
+  Users,
   Plus,
   Search,
   UserCheck,
@@ -44,6 +45,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { formatDate, getInitials } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/page-header";
 import { toast } from "sonner";
 
 interface User {
@@ -234,11 +236,8 @@ export default function UsersPage() {
   if (error && !loading) {
     return (
       <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Users & Roles</h1>
-          <p className="text-gray-500">Manage user accounts and permissions</p>
-        </div>
-        <Card className="border-red-200 bg-red-50/50">
+        <PageHeader title="Users & Roles" description="Manage user accounts and permissions" icon={Shield} />
+        <Card className="border-red-100 bg-red-50/40">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
               <AlertTriangle className="w-8 h-8 text-red-600" />
@@ -265,11 +264,7 @@ export default function UsersPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Users & Roles</h1>
-          <p className="text-gray-500">Manage user accounts and permissions</p>
-        </div>
+      <PageHeader title="Users & Roles" description="Manage user accounts and permissions" icon={Shield}>
         <Dialog
           open={isAddDialogOpen}
           onOpenChange={(open) => {
@@ -422,19 +417,19 @@ export default function UsersPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageHeader>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
-        <Card>
+        <Card className="card-hover">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-100">
-                <Shield className="w-5 h-5 text-blue-600" />
+              <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-violet-500/15 to-fuchsia-500/15 border border-violet-500/10">
+                <Shield className="w-5 h-5 text-violet-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Committee Members</p>
+                <p className="text-sm text-muted-foreground">Committee Members</p>
                 <p className="text-lg font-bold">
                   {users.filter((u) => u.role === "COMMITTEE_MEMBER").length}
                 </p>
@@ -442,17 +437,30 @@ export default function UsersPage() {
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="card-hover">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gray-100">
-                <Shield className="w-5 h-5 text-gray-600" />
+              <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500/15 to-indigo-500/15 border border-blue-500/10">
+                <Users className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-500">Residents</p>
+                <p className="text-sm text-muted-foreground">Residents</p>
                 <p className="text-lg font-bold">
                   {users.filter((u) => u.role === "RESIDENT").length}
                 </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="card-hover">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-500/15 to-teal-500/15 border border-emerald-500/10">
+                <UserCheck className="w-5 h-5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Users</p>
+                <p className="text-lg font-bold">{users.length}</p>
               </div>
             </div>
           </CardContent>

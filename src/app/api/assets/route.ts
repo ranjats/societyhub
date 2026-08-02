@@ -1,22 +1,28 @@
 import { NextResponse } from "next/server";
-import { requirePermission } from "@/lib/authorization";
+import { requireAuth, requirePermission } from "@/lib/authorization";
 import prisma from "@/lib/prisma";
 import { assetSchema } from "@/lib/validations";
 
 export async function GET() {
   try {
-    const authResult = await requirePermission("assets:view");
+    // Both committee members and residents can view assets; residents only
+    // see the inventory (no internal booking details).
+    const authResult = await requireAuth();
     if (authResult.error) return authResult.error;
     const { context } = authResult;
 
+    const isCommittee = context.role === "COMMITTEE_MEMBER";
+
     const assets = await prisma.asset.findMany({
       where: { societyId: context.societyId, deletedAt: null },
-      include: {
-        bookings: {
-          where: { status: "ACTIVE" },
-          include: { resident: { select: { firstName: true, lastName: true } } },
-        },
-      },
+      include: isCommittee
+        ? {
+            bookings: {
+              where: { status: { in: ["ACTIVE", "APPROVED"] } },
+              include: { resident: { select: { firstName: true, lastName: true } } },
+            },
+          }
+        : undefined,
       orderBy: { createdAt: "desc" },
     });
 

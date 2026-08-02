@@ -51,6 +51,16 @@ export const eventSchema = z.object({
 
 export type EventInput = z.infer<typeof eventSchema>;
 
+/** Resident event participation — headcount by gender/age group. */
+export const eventParticipationSchema = z.object({
+  maleCount: z.number().int().min(0, "Must be 0 or more").default(0),
+  femaleCount: z.number().int().min(0, "Must be 0 or more").default(0),
+  childrenCount: z.number().int().min(0, "Must be 0 or more").default(0),
+  notes: z.string().optional(),
+});
+
+export type EventParticipationInput = z.infer<typeof eventParticipationSchema>;
+
 export const noticeSchema = z.object({
   title: z.string().min(1, "Title is required"),
   content: z.string().min(1, "Content is required"),
@@ -76,15 +86,29 @@ export const collectionSchema = z.object({
   amount: z.number().min(0.01, "Amount must be positive"),
   dueDate: z.coerce.date(),
   paidDate: z.coerce.date().optional(),
-  status: z.enum(["PAID", "PENDING", "OVERDUE", "PARTIAL"]).default("PENDING"),
+  status: z
+    .enum(["PAID", "PENDING", "SUBMITTED", "OVERDUE", "PARTIAL"])
+    .default("PENDING"),
   month: z.number().min(1, "Month is required").max(12, "Month must be 1-12"),
   year: z.number().min(2020, "Year must be valid"),
   flatId: z.string().min(1, "Flat is required"),
   notes: z.string().optional(),
+  paymentMethod: z.string().optional(),
   receiptNumber: z.string().optional(),
 });
 
 export type CollectionInput = z.infer<typeof collectionSchema>;
+
+/** Resident payment submission — flat is derived from the logged-in resident. */
+export const paymentSubmissionSchema = z.object({
+  month: z.number().min(1, "Month is required").max(12, "Month must be 1-12"),
+  year: z.number().min(2020, "Year must be valid"),
+  amount: z.number().min(0.01, "Amount must be positive"),
+  notes: z.string().optional(),
+  paymentMethod: z.string().optional(),
+});
+
+export type PaymentSubmissionInput = z.infer<typeof paymentSubmissionSchema>;
 
 export const assetSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -101,9 +125,24 @@ export const assetBookingSchema = z.object({
   assetId: z.string().min(1, "Asset is required"),
   quantity: z.number().min(1, "Quantity must be at least 1").default(1),
   notes: z.string().optional(),
+  pickupDate: z.coerce.date().optional(),
+  expectedReturnDate: z.coerce.date().optional(),
 });
 
 export type AssetBookingInput = z.infer<typeof assetBookingSchema>;
+
+/** Resident asset request — pickup & return dates are required. */
+export const assetRequestSchema = assetBookingSchema
+  .extend({
+    pickupDate: z.coerce.date({ message: "Pickup date is required" }),
+    expectedReturnDate: z.coerce.date({ message: "Return date is required" }),
+  })
+  .refine((d) => d.expectedReturnDate >= d.pickupDate, {
+    message: "Return date must be on or after the pickup date",
+    path: ["expectedReturnDate"],
+  });
+
+export type AssetRequestInput = z.infer<typeof assetRequestSchema>;
 
 export const userCreateSchema = z.object({
   email: z.string().email("Invalid email"),

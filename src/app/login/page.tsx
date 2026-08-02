@@ -17,7 +17,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { Building2, Loader2, Mail, Lock } from "lucide-react";
+import { Building2, Loader2, Mail, Lock, ShieldCheck, Users, Home } from "lucide-react";
 import { toast } from "sonner";
 
 export default function LoginPage() {
@@ -56,19 +56,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-50 p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
-            <Building2 className="w-8 h-8 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-auth p-4">
+      <div className="w-full max-w-md relative z-10">
+        <div className="text-center mb-8 animate-fade-up">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-2 text-white shadow-glow mb-4">
+            <Building2 className="w-8 h-8" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">SocietyHub</h1>
-          <p className="text-gray-500 mt-2">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            Society<span className="text-gradient">Hub</span>
+          </h1>
+          <p className="text-muted-foreground mt-2">
             Society Management System
           </p>
         </div>
 
-        <Card className="shadow-lg border-0">
+        <Card className="shadow-card border-border/70 backdrop-blur-sm animate-scale-in">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl text-center">Welcome back</CardTitle>
             <CardDescription className="text-center">
@@ -80,7 +82,7 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="email"
                     type="email"
@@ -96,7 +98,7 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="password"
                     type="password"
@@ -113,7 +115,7 @@ export default function LoginPage() {
             <CardFooter className="flex flex-col space-y-4">
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full h-11"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -125,9 +127,9 @@ export default function LoginPage() {
                   "Sign in"
                 )}
               </Button>
-              <p className="text-sm text-center text-gray-600">
+              <p className="text-sm text-center text-muted-foreground">
                 Don&apos;t have an account?{" "}
-                <Link href="/signup" className="text-primary hover:underline font-medium">
+                <Link href="/signup" className="text-primary hover:underline font-semibold">
                   Register as Resident
                 </Link>
               </p>
@@ -135,12 +137,36 @@ export default function LoginPage() {
           </form>
         </Card>
 
-        <div className="mt-6 p-4 rounded-lg bg-gray-50 border border-gray-200">
-          <p className="text-xs text-gray-500 font-medium mb-2">Demo Credentials:</p>
-          <div className="space-y-1 text-xs text-gray-600">
-            <p><strong>Super Admin:</strong> admin@societyhub.com / password123</p>
-            <p><strong>Committee:</strong> committee@societyhub.com / password123</p>
-            <p><strong>Resident:</strong> resident@societyhub.com / password123</p>
+        <div className="mt-6 p-4 rounded-xl bg-card/70 border border-border/60 backdrop-blur-sm shadow-soft">
+          <p className="text-xs text-muted-foreground font-semibold mb-3 flex items-center gap-1.5">
+            <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+            Demo Credentials
+          </p>
+          <div className="grid grid-cols-1 gap-2 text-xs">
+            <div className="flex items-center gap-2.5">
+              <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-primary/10 text-primary shrink-0">
+                <ShieldCheck className="w-3.5 h-3.5" />
+              </span>
+              <span className="text-muted-foreground min-w-0 truncate">
+                <strong className="text-foreground">Super Admin:</strong> admin@societyhub.com / password123
+              </span>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-violet-500/10 text-violet-600 shrink-0">
+                <Users className="w-3.5 h-3.5" />
+              </span>
+              <span className="text-muted-foreground min-w-0 truncate">
+                <strong className="text-foreground">Committee:</strong> committee@societyhub.com / password123
+              </span>
+            </div>
+            <div className="flex items-center gap-2.5">
+              <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 shrink-0">
+                <Home className="w-3.5 h-3.5" />
+              </span>
+              <span className="text-muted-foreground min-w-0 truncate">
+                <strong className="text-foreground">Resident:</strong> resident@societyhub.com / password123
+              </span>
+            </div>
           </div>
         </div>
       </div>

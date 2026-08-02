@@ -59,6 +59,7 @@ import {
   Clock,
 } from "lucide-react";
 import { formatDate, getInitials } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/page-header";
 import { toast } from "sonner";
 
 interface Resident {
@@ -296,13 +297,12 @@ export default function ResidentsPage() {
   if (error && !loading) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Residents</h1>
-            <p className="text-gray-500">Manage society residents</p>
-          </div>
-        </div>
-        <Card className="border-red-200 bg-red-50/50">
+        <PageHeader
+          title="Residents"
+          description="Manage society residents"
+          icon={Users}
+        />
+        <Card className="border-red-100 bg-red-50/40">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <AlertTriangle className="w-8 h-8 text-red-600 mb-4" />
             <h2 className="text-lg font-semibold text-red-900 mb-2">
@@ -428,11 +428,11 @@ export default function ResidentsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Residents</h1>
-          <p className="text-gray-500">Manage society residents</p>
-        </div>
+      <PageHeader
+        title="Residents"
+        description="Manage society residents"
+        icon={Users}
+      >
         <Dialog
           open={isAddDialogOpen}
           onOpenChange={(open) => {
@@ -476,7 +476,7 @@ export default function ResidentsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageHeader>
 
       {/* Pending Registrations Section */}
       {pendingResidents.length > 0 && (

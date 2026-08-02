@@ -84,6 +84,7 @@ model Resident {
   societyId         String
   flatId            String
   assetBookings     AssetBooking[]
+  eventParticipations EventParticipant[]
   flat              Flat           @relation(fields: [flatId], references: [id])
   society           Society        @relation(fields: [societyId], references: [id])
   user              User?
@@ -151,6 +152,8 @@ model Collection {
   month         Int
   year          Int
   notes         String?
+  paymentMethod String?
+  submittedAt   DateTime?
   receiptNumber String?
   createdAt     DateTime         @default(now())
   updatedAt     DateTime         @updatedAt
@@ -213,11 +216,30 @@ model Event {
   createdBy    String
   creator      User        @relation(fields: [createdBy], references: [id])
   society      Society     @relation(fields: [societyId], references: [id])
+  participants EventParticipant[]
 
   @@index([societyId])
   @@index([startDate])
   @@index([status])
   @@index([deletedAt])
+}
+
+model EventParticipant {
+  id            String   @id @default(cuid())
+  maleCount     Int      @default(0)
+  femaleCount   Int      @default(0)
+  childrenCount Int      @default(0)
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  eventId       String
+  residentId    String
+  event         Event    @relation(fields: [eventId], references: [id])
+  resident      Resident @relation(fields: [residentId], references: [id])
+
+  @@unique([eventId, residentId])
+  @@index([eventId])
+  @@index([residentId])
 }
 
 model Notice {
@@ -265,17 +287,19 @@ model Asset {
 }
 
 model AssetBooking {
-  id         String             @id @default(cuid())
-  quantity   Int                @default(1)
-  status     AssetBookingStatus @default(ACTIVE)
-  borrowDate DateTime           @default(now())
-  returnDate DateTime?
-  notes      String?
-  createdAt  DateTime           @default(now())
-  updatedAt  DateTime           @updatedAt
-  assetId    String
-  residentId String
-  societyId  String
+  id                 String             @id @default(cuid())
+  quantity           Int                @default(1)
+  status             AssetBookingStatus @default(REQUESTED)
+  borrowDate         DateTime           @default(now())
+  returnDate         DateTime?
+  pickupDate         DateTime?
+  expectedReturnDate DateTime?
+  notes              String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  assetId            String
+  residentId         String
+  societyId          String
   asset      Asset              @relation(fields: [assetId], references: [id])
   resident   Resident           @relation(fields: [residentId], references: [id])
   society    Society            @relation(fields: [societyId], references: [id])
@@ -349,6 +373,7 @@ enum OwnershipType {
 enum CollectionStatus {
   PAID
   PENDING
+  SUBMITTED
   OVERDUE
   PARTIAL
 }
@@ -386,11 +411,16 @@ enum NotificationType {
   EVENT
   NOTICE
   EXPENSE
+  ASSET
   GENERAL
 }
 
 enum AssetBookingStatus {
+  REQUESTED
+  APPROVED
   ACTIVE
+  REJECTED
   RETURNED
+  COMPLETED
   CANCELLED
 }

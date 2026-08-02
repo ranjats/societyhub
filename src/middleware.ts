@@ -22,7 +22,7 @@ const roleRouteAccess: Record<string, string[]> = {
   ],
   RESIDENT: [
     "/dashboard", "/profile", "/payments", "/events", "/notices",
-    "/calendar", "/vehicles", "/notifications",
+    "/calendar", "/vehicles", "/assets", "/notifications",
   ],
 };
 

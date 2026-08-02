@@ -66,6 +66,7 @@ export const {
             name: `${user.firstName} ${user.lastName}`,
             role: user.role,
             societyId: user.societyId,
+            residentId: user.residentId ?? undefined,
           };
         } catch (error) {
           console.error("[Auth] Authorization error:", error);
@@ -79,6 +80,7 @@ export const {
       if (user) {
         token.role = user.role;
         token.societyId = user.societyId;
+        token.residentId = user.residentId;
       }
       return token;
     },
@@ -87,6 +89,7 @@ export const {
         session.user.id = token.sub!;
         session.user.role = token.role;
         session.user.societyId = token.societyId;
+        session.user.residentId = token.residentId;
       }
       return session;
     },

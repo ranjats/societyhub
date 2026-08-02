@@ -22,6 +22,7 @@ import {
   Plus,
 } from "lucide-react";
 import { formatDate } from "@/lib/utils";
+import { PageHeader } from "@/components/ui/page-header";
 import { toast } from "sonner";
 
 interface CalendarEvent {
@@ -109,11 +110,7 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Calendar</h1>
-          <p className="text-gray-500">Society events and important dates</p>
-        </div>
+      <PageHeader title="Calendar" description="Society events and important dates" icon={Calendar}>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button>
@@ -160,19 +157,21 @@ export default function CalendarPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
+      </PageHeader>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <Button variant="ghost" size="icon" onClick={() => navigateMonth("prev")}>
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-          <CardTitle className="text-xl">
-            {monthName} {year}
-          </CardTitle>
-          <Button variant="ghost" size="icon" onClick={() => navigateMonth("next")}>
-            <ChevronRight className="h-5 w-5" />
-          </Button>
+      <Card>          <CardHeader className="flex flex-row items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="icon" onClick={() => navigateMonth("prev")} className="h-9 w-9">
+              <ChevronLeft className="h-5 w-5" />
+            </Button>
+            <CardTitle className="text-xl">
+              {monthName} {year}
+            </CardTitle>
+            <Button variant="outline" size="icon" onClick={() => navigateMonth("next")} className="h-9 w-9">
+              <ChevronRight className="h-5 w-5" />
+            </Button>
+          </div>
+          <Badge variant="outline">{events.length} events</Badge>
         </CardHeader>
         <CardContent>
           {loading ? (
