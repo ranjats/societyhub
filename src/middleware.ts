@@ -10,7 +10,7 @@ interface JWTPayload {
   [key: string]: unknown;
 }
 
-const publicPaths = ["/login", "/signup", "/api/auth"];
+const publicPaths = ["/login", "/signup", "/reset-password", "/api/auth"];
 const unauthorizedPath = "/unauthorized";
 
 // Role-based route access rules

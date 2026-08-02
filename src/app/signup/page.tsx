@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/card";
 import { Loader2, User, Phone, Mail, Lock, Home } from "lucide-react";
 import { toast } from "sonner";
+import EclipseSky from "@/components/auth/eclipse-sky";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -98,6 +99,7 @@ export default function SignupPage() {
   if (isSuccess) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-auth p-4">
+        <EclipseSky />
         <div className="w-full max-w-md relative z-10">
           <div className="text-center mb-8 animate-fade-up">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white border border-border/70 shadow-glow overflow-hidden mb-4">
@@ -108,29 +110,29 @@ export default function SignupPage() {
                 className="w-20 h-20 object-contain"
               />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight text-foreground">
+            <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-sm">
               Society<span className="text-gradient">Hub</span>
             </h1>
           </div>
 
-          <Card className="shadow-card border-border/70 backdrop-blur-sm animate-scale-in">
+          <Card className="auth-panel text-white animate-scale-in">
             <CardHeader className="space-y-1 pb-4">
-              <CardTitle className="text-xl text-center text-green-600">Registration Successful!</CardTitle>
+              <CardTitle className="text-xl text-center text-emerald-300">Registration Successful!</CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
-              <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                <p className="text-green-800">
+              <div className="p-4 bg-emerald-500/10 rounded-lg border border-emerald-400/25">
+                <p className="text-emerald-300">
                   Your account has been created and is pending approval from the society committee.
                 </p>
               </div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-white/60">
                 You will receive access once a committee member approves your registration. 
                 You can then login with your email and password.
               </p>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Link href="/login" className="w-full">
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full btn-auth-ghost">
                   Go to Login
                 </Button>
               </Link>
@@ -143,6 +145,7 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-auth p-4">
+      <EclipseSky />
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8 animate-fade-up">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white border border-border/70 shadow-glow overflow-hidden mb-4">
@@ -153,16 +156,16 @@ export default function SignupPage() {
               className="w-20 h-20 object-contain"
             />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="text-3xl font-bold tracking-tight text-white drop-shadow-sm">
             Society<span className="text-gradient">Hub</span>
           </h1>
-          <p className="text-muted-foreground mt-2">Resident Registration</p>
+          <p className="text-white/70 mt-2">Resident Registration</p>
         </div>
 
-        <Card className="shadow-card border-border/70 backdrop-blur-sm animate-scale-in">
+        <Card className="auth-panel text-white animate-scale-in">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-xl text-center">Create Account</CardTitle>
-            <CardDescription className="text-center">
+            <CardDescription className="text-center text-white/60">
               Register as a new resident. Your account will be pending committee approval.
             </CardDescription>
           </CardHeader>
@@ -172,17 +175,17 @@ export default function SignupPage() {
                 <div className="space-y-2">
                   <Label htmlFor="firstName">First Name *</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
                     <Input
                       id="firstName"
                       placeholder="John"
                       value={formData.firstName}
                       onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                      className={`pl-10 ${errors.firstName ? "border-red-500" : ""}`}
+                      className={`pl-10 auth-input ${errors.firstName ? "border-red-500!" : ""}`}
                       disabled={isLoading}
                     />
                   </div>
-                  {errors.firstName && <p className="text-sm text-red-500">{errors.firstName}</p>}
+                  {errors.firstName && <p className="text-sm text-red-400">{errors.firstName}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="lastName">Last Name *</Label>
@@ -191,101 +194,101 @@ export default function SignupPage() {
                     placeholder="Doe"
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className={errors.lastName ? "border-red-500" : ""}
+                    className={`auth-input ${errors.lastName ? "border-red-500!" : ""}`}
                     disabled={isLoading}
                   />
-                  {errors.lastName && <p className="text-sm text-red-500">{errors.lastName}</p>}
+                  {errors.lastName && <p className="text-sm text-red-400">{errors.lastName}</p>}
                 </div>
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="email">Email *</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
                   <Input
                     id="email"
                     type="email"
                     placeholder="john.doe@example.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className={`pl-10 ${errors.email ? "border-red-500" : ""}`}
+                    className={`pl-10 auth-input ${errors.email ? "border-red-500!" : ""}`}
                     disabled={isLoading}
                   />
                 </div>
-                {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
+                {errors.email && <p className="text-sm text-red-400">{errors.email}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number *</Label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
                   <Input
                     id="phone"
                     type="tel"
                     placeholder="+91 98765 43210"
                     value={formData.phone}
                     onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className={`pl-10 ${errors.phone ? "border-red-500" : ""}`}
+                    className={`pl-10 auth-input ${errors.phone ? "border-red-500!" : ""}`}
                     disabled={isLoading}
                   />
                 </div>
-                {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
+                {errors.phone && <p className="text-sm text-red-400">{errors.phone}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="flatNumber">Flat/House Number *</Label>
                 <div className="relative">
-                  <Home className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Home className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
                   <Input
                     id="flatNumber"
                     placeholder="e.g. A-101, B-202"
                     value={formData.flatNumber}
                     onChange={(e) => setFormData({ ...formData, flatNumber: e.target.value })}
-                    className={`pl-10 ${errors.flatNumber ? "border-red-500" : ""}`}
+                    className={`pl-10 auth-input ${errors.flatNumber ? "border-red-500!" : ""}`}
                     disabled={isLoading}
                   />
                 </div>
-                {errors.flatNumber && <p className="text-sm text-red-500">{errors.flatNumber}</p>}
+                {errors.flatNumber && <p className="text-sm text-red-400">{errors.flatNumber}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="password">Password *</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
                   <Input
                     id="password"
                     type="password"
                     placeholder="Create a password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className={`pl-10 ${errors.password ? "border-red-500" : ""}`}
+                    className={`pl-10 auth-input ${errors.password ? "border-red-500!" : ""}`}
                     disabled={isLoading}
                   />
                 </div>
-                {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
+                {errors.password && <p className="text-sm text-red-400">{errors.password}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm Password *</Label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/40" />
                   <Input
                     id="confirmPassword"
                     type="password"
                     placeholder="Confirm your password"
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    className={`pl-10 ${errors.confirmPassword ? "border-red-500" : ""}`}
+                    className={`pl-10 auth-input ${errors.confirmPassword ? "border-red-500!" : ""}`}
                     disabled={isLoading}
                   />
                 </div>
-                {errors.confirmPassword && <p className="text-sm text-red-500">{errors.confirmPassword}</p>}
+                {errors.confirmPassword && <p className="text-sm text-red-400">{errors.confirmPassword}</p>}
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button
                 type="submit"
-                className="w-full"
+                className="w-full btn-auth-gradient"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -297,9 +300,9 @@ export default function SignupPage() {
                   "Register"
                 )}
               </Button>
-              <p className="text-sm text-center text-gray-600">
+              <p className="text-sm text-center text-white/60">
                 Already have an account?{" "}
-                <Link href="/login" className="text-primary hover:underline">
+                <Link href="/login" className="text-amber-300 hover:text-amber-200 hover:underline">
                   Sign in
                 </Link>
               </p>

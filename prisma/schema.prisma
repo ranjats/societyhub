@@ -45,6 +45,8 @@ model User {
   avatar        String?
   isActive      Boolean        @default(true)
   lastLoginAt   DateTime?
+  resetToken    String? // sha256 hash of the password-reset token
+  resetTokenExpiry DateTime?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   deletedAt     DateTime?

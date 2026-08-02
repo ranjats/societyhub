@@ -79,37 +79,132 @@ body {
     radial-gradient(ellipse 50% 60% at 100% 100%, rgb(6 182 212 / 0.05), transparent);
 }
 
-/* Auth / landing page background with floating gradient blobs */
+/* Auth / landing page background — solar eclipse theme */
 .bg-auth {
   position: relative;
-  background-color: hsl(228, 45%, 97%);
+  background-color: #0b1026;
+  background-image:
+    radial-gradient(1.5px 1.5px at 15% 25%, rgba(255, 255, 255, 0.85), transparent),
+    radial-gradient(1px 1px at 30% 70%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1.5px 1.5px at 55% 12%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 70% 55%, rgba(255, 255, 255, 0.45), transparent),
+    radial-gradient(1.5px 1.5px at 85% 30%, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 42% 88%, rgba(255, 255, 255, 0.5), transparent),
+    radial-gradient(1.5px 1.5px at 92% 82%, rgba(255, 255, 255, 0.6), transparent),
+    radial-gradient(1px 1px at 8% 60%, rgba(255, 255, 255, 0.4), transparent),
+    linear-gradient(180deg, #060a1d 0%, #10153a 52%, #1b1440 100%);
   overflow: hidden;
 }
 
-.bg-auth::before,
-.bg-auth::after {
+/* Solar corona — the glowing halo */
+.bg-auth::before {
   content: "";
   position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 640px;
+  height: 640px;
   border-radius: 9999px;
-  filter: blur(90px);
-  opacity: 0.55;
+  background: radial-gradient(
+    circle,
+    rgba(255, 178, 72, 0.55) 0%,
+    rgba(255, 138, 60, 0.26) 38%,
+    transparent 70%
+  );
+  filter: blur(16px);
+  animation: eclipse-breathe 7s ease-in-out infinite;
   pointer-events: none;
 }
 
-.bg-auth::before {
-  width: 560px;
-  height: 560px;
-  top: -180px;
-  left: -120px;
-  background: radial-gradient(circle, rgb(99 102 241 / 0.35), transparent 70%);
+/* The eclipsed moon — dark disc inside the corona */
+.bg-auth::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 240px;
+  height: 240px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 32%, #232a55 0%, #0b0f26 58%, #05071a 100%);
+  box-shadow:
+    0 0 100px 26px rgba(255, 164, 60, 0.38),
+    inset -12px -12px 44px rgba(255, 190, 90, 0.12),
+    inset 12px 14px 34px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
 }
 
-.bg-auth::after {
-  width: 520px;
-  height: 520px;
-  bottom: -200px;
-  right: -140px;
-  background: radial-gradient(circle, rgb(168 85 247 / 0.3), transparent 70%);
+@keyframes eclipse-breathe {
+  0%,
+  100% {
+    opacity: 0.85;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.06);
+  }
+}
+
+/* Twinkling stars over the eclipse sky */
+.star {
+  position: absolute;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 0 6px 1px rgba(255, 255, 255, 0.65);
+  opacity: 0.25;
+  animation: twinkle 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+/* Shooting stars streaking across the sky */
+.shooting-star {
+  position: absolute;
+  width: 140px;
+  height: 2px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    #fff,
+    rgba(255, 255, 255, 0.5) 35%,
+    transparent 85%
+  );
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.85));
+  opacity: 0;
+  transform: rotate(-32deg);
+  animation: shooting-star 8s ease-in infinite;
+  pointer-events: none;
+}
+
+@keyframes shooting-star {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(-32deg);
+    opacity: 0;
+  }
+  3% {
+    opacity: 1;
+  }
+  12% {
+    transform: translate3d(-300px, 180px, 0) rotate(-32deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translate3d(-300px, 180px, 0) rotate(-32deg);
+    opacity: 0;
+  }
 }
 
 /* Gradient text */
@@ -134,6 +229,112 @@ body {
 
 .btn-primary-gradient:active {
   transform: translateY(1px) scale(0.99);
+}
+
+/* ---------- Auth card theme — dark glass over the eclipse sky ---------- */
+
+/* Card surface: frosted night-glass with a warm corona glow */
+.auth-panel {
+  position: relative;
+  background: linear-gradient(
+    160deg,
+    rgba(28, 34, 74, 0.82) 0%,
+    rgba(16, 20, 50, 0.78) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    0 24px 64px -16px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 44px -8px rgba(255, 164, 60, 0.25);
+  overflow: hidden;
+}
+
+/* Corona accent — a glowing amber arc across the top edge */
+.auth-panel::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 178, 72, 0.9) 25%,
+    rgba(255, 138, 60, 0.9) 75%,
+    transparent
+  );
+  box-shadow: 0 0 14px 2px rgba(255, 164, 60, 0.45);
+  pointer-events: none;
+}
+
+/* Dark glass form fields */
+.auth-input {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  box-shadow: none;
+}
+
+.auth-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.auth-input:focus-visible {
+  border-color: rgba(255, 178, 72, 0.65);
+  --tw-ring-color: rgba(255, 178, 72, 0.3);
+}
+
+/* Keep dark fields dark when the browser autofills them */
+.auth-input:-webkit-autofill {
+  -webkit-text-fill-color: #fff;
+  -webkit-box-shadow: 0 0 0 1000px rgba(23, 28, 61, 0.95) inset;
+  caret-color: #fff;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* Auth primary button — corona gradient (amber) */
+.btn-auth-gradient {
+  background-image: linear-gradient(135deg, #fbbf24 0%, #ea580c 100%);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.25), 0 4px 16px -2px rgb(249 115 22 / 0.5);
+}
+
+.btn-auth-gradient:hover {
+  filter: brightness(1.06);
+  box-shadow: 0 2px 4px 0 rgb(0 0 0 / 0.25), 0 8px 24px -4px rgb(249 115 22 / 0.55);
+}
+
+/* Auth ghost button — translucent dark for secondary actions */
+.btn-auth-ghost {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+.btn-auth-ghost:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 178, 72, 0.45);
+  color: #fff;
+}
+
+/* Auth dialog — dark glass matching .auth-panel (no position/overflow so the
+   Radix DialogContent fixed centering stays intact) */
+.auth-dialog {
+  background: linear-gradient(
+    160deg,
+    rgba(28, 34, 74, 0.97) 0%,
+    rgba(16, 20, 50, 0.97) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow:
+    0 24px 64px -16px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 44px -8px rgba(255, 164, 60, 0.25);
 }
 
 /* Card hover lift */
@@ -246,7 +447,17 @@ body {
 
   .bg-auth::before,
   .bg-auth::after {
-    filter: none;
-    opacity: 0.35;
+    animation: none !important;
+    opacity: 0.75;
+  }
+
+  .star {
+    animation: none !important;
+    opacity: 0.5;
+  }
+
+  .shooting-star {
+    animation: none !important;
+    opacity: 0;
   }
 }

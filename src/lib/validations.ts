@@ -7,6 +7,19 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
+
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(20, "Reset link is invalid or expired"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
+
 export const flatSchema = z.object({
   flatNumber: z.string().min(1, "Flat number is required"),
   floor: z.number().min(0, "Floor must be a positive number"),
