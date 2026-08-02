@@ -55,6 +55,24 @@ export async function GET() {
         take: 10,
       });
 
+      const committeeMembers = await prisma.user.findMany({
+        where: {
+          societyId,
+          role: "COMMITTEE_MEMBER",
+          isActive: true,
+          deletedAt: null,
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+          phone: true,
+          lastLoginAt: true,
+        },
+        orderBy: { firstName: "asc" },
+      });
+
       const pendingAmount = myCollections
         .filter((c) => c.status === "PENDING" || c.status === "OVERDUE")
         .reduce((sum, c) => sum + Number(c.amount), 0);
@@ -83,6 +101,7 @@ export async function GET() {
         calendarEventsList: calendarEvents,
         notifications,
         vehicleList: resident?.vehicles || [],
+        committeeMembers,
       });
     }
 

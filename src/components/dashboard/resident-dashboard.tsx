@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { PageHeader } from "@/components/ui/page-header";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency, formatDate, getInitials } from "@/lib/utils";
 import {
   CalendarDays,
   Megaphone,
@@ -36,6 +36,14 @@ interface DashboardData {
   calendarEventsList: any[];
   notifications: any[];
   vehicleList: any[];
+  committeeMembers: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string | null;
+    lastLoginAt: string | null;
+  }[];
 }
 
 export function ResidentDashboard() {
@@ -416,6 +424,42 @@ export function ResidentDashboard() {
           )}
         </CardContent>
       </Card>
+
+      {/* Committee Members */}
+      {data?.committeeMembers && data.committeeMembers.length > 0 && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Society Committee</CardTitle>
+            <Badge variant="outline">{data.committeeMembers.length} Members</Badge>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {data.committeeMembers.map((member, index) => (
+                <div
+                  key={member.id || index}
+                  className="flex items-center gap-3 p-4 rounded-xl bg-muted/40 border border-transparent hover:bg-white hover:border-primary/25 hover:shadow-card transition-all duration-200"
+                >
+                  <div className="flex items-center justify-center w-11 h-11 rounded-xl bg-gradient-to-br from-primary to-primary-2 text-white font-semibold text-sm shrink-0">
+                    {getInitials(member.firstName, member.lastName)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-foreground text-sm truncate">
+                      {member.firstName} {member.lastName}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">{member.email}</p>
+                    {member.phone && (
+                      <p className="text-xs text-muted-foreground truncate">{member.phone}</p>
+                    )}
+                  </div>
+                  <Badge variant="secondary" className="shrink-0 text-[10px]">
+                    Committee
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Notifications */}
       {data?.notifications && data.notifications.length > 0 && (
