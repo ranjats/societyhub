@@ -92,7 +92,19 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        toast.error("Invalid email or password. Please try again.");
+        // Log the raw result — next-auth error codes help diagnose
+        // deployment issues (e.g. a misconfigured AUTH_URL on Vercel).
+        // eslint-disable-next-line no-console
+        console.error("[Login] signIn failed:", result);
+        // "CredentialsSignin" = wrong email/password. Anything else is
+        // likely a server/config problem (e.g. missing env vars on Vercel).
+        if (result.error === "CredentialsSignin") {
+          toast.error("Invalid email or password. Please try again.");
+        } else {
+          toast.error(
+            "Sign-in failed due to a server configuration error. Check that AUTH_SECRET and DATABASE_URL are set on your deployment, and that AUTH_URL is removed."
+          );
+        }
       } else {
         // Use window.location.href for a full page reload to ensure
         // the session cookie is sent with the middleware request.
@@ -101,6 +113,8 @@ export default function LoginPage() {
         window.location.href = callbackUrl;
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error("[Login] signIn threw:", error);
       toast.error("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
