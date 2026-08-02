@@ -20,7 +20,6 @@ import {
   User,
   Menu,
   ChevronDown,
-  Building2,
   IndianRupee,
   CalendarDays,
   Megaphone,
@@ -169,11 +168,13 @@ export function Header({ user, onMobileMenuToggle }: HeaderProps) {
       {/* Right side */}
       <div className="flex items-center gap-2.5">
         {/* Society Badge */}
-        <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/8 to-primary-2/8 border border-primary/10">
-          <Building2 className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium text-foreground">
-            99 Sentosa Green Society
-          </span>
+        <div className="hidden md:flex items-center h-10 px-2 rounded-full bg-white border border-border/60 shadow-soft overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/sentosa-logo.png"
+            alt="Sentosa Greens"
+            className="h-9 w-auto object-contain"
+          />
         </div>
 
         {/* Notifications */}

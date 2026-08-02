@@ -23,7 +23,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Building2 as LogoIcon } from "lucide-react";
+
 
 interface MenuItem {
   label: string;
@@ -116,8 +116,13 @@ export function Sidebar({ role, collapsed = false, onToggle, isMobile = false }:
       {/* Logo */}
       <div className="flex items-center justify-between h-16 px-4 border-b border-border/60 bg-gradient-to-r from-primary/[0.04] to-transparent">
         <Link href="/dashboard" className="flex items-center gap-2.5 group">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary-2 text-white shadow-glow transition-transform duration-200 group-hover:scale-105">
-            <LogoIcon className="w-5 h-5" />
+          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-white border border-border/70 shadow-soft overflow-hidden transition-transform duration-200 group-hover:scale-105">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/sentosa-logo.png"
+              alt="Sentosa Greens"
+              className="w-9 h-9 object-contain"
+            />
           </div>
           {showLabels && (
             <span className="font-bold text-lg tracking-tight text-foreground">

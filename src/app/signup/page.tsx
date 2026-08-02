@@ -16,7 +16,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Building2, Loader2, User, Phone, Mail, Lock, Home } from "lucide-react";
+import { Loader2, User, Phone, Mail, Lock, Home } from "lucide-react";
 import { toast } from "sonner";
 
 export default function SignupPage() {
@@ -100,8 +100,13 @@ export default function SignupPage() {
       <div className="min-h-screen flex items-center justify-center bg-auth p-4">
         <div className="w-full max-w-md relative z-10">
           <div className="text-center mb-8 animate-fade-up">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-2 text-white shadow-glow mb-4">
-              <Building2 className="w-8 h-8" />
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white border border-border/70 shadow-glow overflow-hidden mb-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/sentosa-logo.png"
+                alt="Sentosa Greens"
+                className="w-20 h-20 object-contain"
+              />
             </div>
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
               Society<span className="text-gradient">Hub</span>
@@ -140,8 +145,13 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center bg-auth p-4">
       <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8 animate-fade-up">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-2 text-white shadow-glow mb-4">
-            <Building2 className="w-8 h-8" />
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-white border border-border/70 shadow-glow overflow-hidden mb-4">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/sentosa-logo.png"
+              alt="Sentosa Greens"
+              className="w-20 h-20 object-contain"
+            />
           </div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Society<span className="text-gradient">Hub</span>
